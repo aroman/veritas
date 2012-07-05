@@ -10,8 +10,9 @@ html(lang='en')
       script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
     // TODO: A "V" as an icon.
     //- link(rel="shortcut icon", type="img/png", href="/img/glyph/zap.png")
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Happy+Monkey')
     link(rel='stylesheet', href='/css/bootstrap.superhero.min.css')
-    //- link(rel='stylesheet', href='/css/bootstrap-datepicker.css')
+    //- link(rel='stylesheet', href='/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/app.css')
     link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
     // TODO: Google Analytics
@@ -20,23 +21,15 @@ html(lang='en')
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
-          a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
           //- TODO: logo
           //- img.block-icon(src="/img/veritas.jpg")
-          a.brand.brand-custom(href="/") VERITAS
-          ul.nav
-            li.nav-link
-              a(href="/what") what?
-            li.nav-link
-              a(href="/help") who?
-    .hero-unit.centex
-      h1 The SSocial Network.
-      p "You need a Harvard email to sign up" ;)
-      p
-        a.btn.btn-primary.btn-large Leggo!
+          .centex
+            a.brand.brand-custom(href="/") VERITAS
+            ul.nav.pull-right
+              li.nav-link
+                a(href="/what") what?
+              li.nav-link
+                a(href="/help") who?
                         
     script(src='/js/lib/jquery.js')
     script(src='/js/lib/jquery-ui.min.js')

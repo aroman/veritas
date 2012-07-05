@@ -7,17 +7,36 @@ html, body {
 
 /* Make the body not overlap with the topbar */
 body {
-  padding-top: 60px;
+  padding-top: 100px;
   padding-bottom: 40px;
+}
+
+p {
+  font-family: "Happy Monkey";
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.nav {
+  margin-top: -10px !important;
 }
 
 .navbar .brand {
   float: none;
+  font-size: 33px;
+}
+
+.hero-unit {
+  margin-top: 20px;
 }
 
 .brand-custom {
   /* lolwut i dont even CSS precedence wut */
   margin-left: 5px !important;
+  margin-top: 10px;
+  margin-bottom: -25px;
 }
 
 .centex {
@@ -42,17 +61,6 @@ img.block-icon {
 h4.control-label {
   margin-bottom: 10px;
   margin-top: 10px;
-}
-
-/* Add nice bordering, padding, and background coloring to the call-to-action */
-.hero-unit-custom {
-  padding: 50px;
-  padding-top: 40px;
-  padding-bottom: 20px;
-  background-color: #fff;
-  -webkit-box-shadow: 0 0px 3px rgba(0,0,0,.25);
-     -moz-box-shadow: 0 0px 3px rgba(0,0,0,.25);
-          box-shadow: 0 0px 3px rgba(0,0,0,.25);
 }
 
 .about-image {
