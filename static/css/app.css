@@ -5,28 +5,17 @@ html, body {
   /*background-color: #FAFAFA;*/
 }
 
-/* Make the body not overlap with the topbar */
 body {
-  padding-top: 100px;
-  padding-bottom: 40px;
   font-family: "Happy Monkey";
 }
 
-a:hover {
-  text-decoration: underline;
-}
-
-.nav {
-  margin-top: -10px !important;
+.nav-link:hover , .brand:hover {
+  text-decoration: overline !important;
 }
 
 .navbar .brand {
   float: none;
   font-size: 33px;
-}
-
-.hero-unit {
-  margin-top: 20px;
 }
 
 .btn-spaced {
@@ -52,11 +41,6 @@ img.block-icon {
 /* Make the text color of text box extension's darker */
 .input-append .add-on {
   color: #666;
-}
-
-/* Make the text color of inline form help darker */
-.help-inline {
-  color: #8C8C8C;
 }
 
 h4.control-label {

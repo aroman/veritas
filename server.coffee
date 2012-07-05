@@ -23,8 +23,10 @@ sessionStore = new MongoStore
   clear_interval: 432000, # 5 days
   () ->
     app.listen 7331
-    console.log "   _______".red
-    console.log "    VE RI \n     TAS".red
+    console.log "   ---------".red
+    console.log "   | VE RI |".red
+    console.log "    \\ TAS /".red
+    console.log "     \\___/".red
 
 app.configure ->
   app.use express.cookieParser()
