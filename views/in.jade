@@ -1,20 +1,31 @@
 .container
   .hero-unit
-    form.form-horizontal
+    form#form.form-horizontal(action="", method="POST")
+      if failed
+        p(style="color:red")
+          | Crud, invalid login.
+        br
       legend Log in
       .control-group
-        .control-label e-mail
+        .control-label Harvard ID
         .controls
-          .input-append
-              input(type="text", placeholder="johnharvard")
-              span.add-on @fas.harvard.edu
+          input(type="text", name="hid", value=hid)
       .control-group
         .control-label password
         .controls
-          input(type="password")
+          input(type="password", name="password")
       br
-      submit.btn.btn-success.btn-large.pull-right OPEN SESAME!
+      input#go.btn.btn-success.btn-large.pull-right(type="submit", value="OPEN SESAME!")
       a.btn.btn-info.pull-left(href="/up") Need an account?
       br
       br
       a.btn.btn-inverse.pull-left Dog ate your password?
+
+:coffeescript
+  go = $("#go")
+  form = $("#form")
+
+  go.click (submit) ->
+    go.val("Opening...")
+    go.prop('disabled', true)
+    form.submit()

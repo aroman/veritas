@@ -3,6 +3,7 @@
 _          = require "underscore"
 fs         = require "fs"
 os         = require "os"
+pwh        = require "password-hash"
 colors     = require "colors"
 connect    = require "connect"
 express    = require "express"
@@ -48,38 +49,40 @@ app.dynamicHelpers
     return package_info.version
 
 ensureSession = (req, res, next) ->
-  req.token = req.session.token
-  if not req.token
-    res.redirect "/?whene=#{req.url}"
+  if not req.session.hid
+    res.redirect "/?whence=#{req.url}"
   else
     next()
 
 app.get "/", (req, res) ->
-  username = req.session.username
-  if username
-    res.redirect "/app"
-  res.render "index"
-    appmode: false
+  if req.session.hid
+    res.redirect "/lounge"
+  else
+    res.render "index"
+      appmode: false
  
 app.get "/what", (req, res) ->
   res.render "what"
-    appmode: false
+    appmode: req.session.hid
 
 app.get "/who", (req, res) ->
   res.render "who"
-    appmode: false
+    appmode: req.session.hid
 
 app.get "/up", (req, res) ->
-  res.render "up"
-    appmode: false
-    failed: false
-    dorms: models.DORMS
-    dorm: 'derp'
-    notevil: ''
-    hid: ''
+  if req.session.hid
+    res.redirect "/lounge"
+  else
+    res.render "up"
+      appmode: false
+      failed: false
+      dorms: models.DORMS
+      dorm: 'derp'
+      notevil: ''
+      hid: ''
 
 app.post "/up", (req, res) ->
-  hid = req.body.hid || ''
+  hid = req.body.hid or ''
   password1 = req.body.password1
   password2 = req.body.password2
   dorm = req.body.dorm
@@ -118,6 +121,31 @@ app.post "/up", (req, res) ->
 app.get "/in", (req, res) ->
   res.render "in"
     appmode: false
+    failed: false
+    hid: ''
+
+app.post "/in", (req, res) ->
+  hid = req.body.hid or ''
+  password = req.body.password
+
+  fail = () ->
+    res.render "in"
+      appmode: false
+      failed: true
+      hid: hid
+
+  models.Account
+    .findOne()
+    .where("hid", hid)
+    .run (err, account) ->
+      if err or not account
+        fail()
+      else
+        if pwh.verify(password, account.password)
+          req.session.hid = hid
+          res.redirect "/lounge"
+        else
+          fail()
 
 app.get "/out", (req, res) ->
   req.session.destroy()
@@ -130,29 +158,9 @@ app.post "/validate", (req, res) ->
   else
     res.send "BUT SIRRR"
 
-# app.get "/setup", ensureSession, (req, res) ->
-#   if req.settings.is_new
-#     res.render "setup"
-#       appmode: false
-#       settings: JSON.stringify req.settings
-#   else
-#     res.redirect "/"
-
-# app.post "/setup", ensureSession, (req, res) ->
-#   settings =
-#     firstrun: true
-#   if req.body.nickname
-#     settings.nickname = req.body.nickname
-#   jbha.Client.update_settings req.token, settings, ->
-#     res.redirect "/"
-
-# app.get "/app*", ensureSession, (req, res) ->
-#   jbha.Client.by_course req.token, (courses) ->
-#     if !req.settings || req.settings.is_new
-#       res.redirect "/setup"
-#     else
-#       res.render "app"
-#         info: package_info
+app.get "/lounge*", ensureSession, (req, res) ->
+  res.render "lounge"
+    appmode: true
 
 io.set "authorization", (data, accept) ->
   if data.headers.cookie
