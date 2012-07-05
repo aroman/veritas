@@ -5,7 +5,7 @@ html, body {
   /*background-color: #FAFAFA;*/
 }
 
-body {
+body, input, select {
   font-family: "Happy Monkey";
 }
 
@@ -27,6 +27,10 @@ body {
   margin-left: 5px !important;
   margin-top: 10px;
   margin-bottom: -25px;
+}
+
+.control-group.error .checkbox, .control-group.error .radio, .control-group.error input, .control-group.error select, .control-group.error textarea {
+  border: 2px solid;
 }
 
 .centex {

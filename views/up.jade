@@ -1,45 +1,124 @@
 .container
   .hero-unit
-    form.form-horizontal
+    form#supform.form-horizontal(action="", method="POST")
       legend Sign up
+      if failed
+        p(style="color:red")
+          | Hmm, couldn't create your account.
+          | Try again or contact Avi.
+        br
       .control-group
-        .control-label e-mail
+        .control-label Harvard ID
         .controls
-          .input-append
-            input(type="text", placeholder="johnharvard")
-            span.add-on @fas.harvard.edu
-          span.help-block you need one of these
+          input#hid(type="text", name="hid", value=hid)
+          span.help-block
       .control-group
         .control-label password
         .controls
-          input(type="password")
-          span.help-block make it good
+          input#pw1(type="password", name="password1")
+          span.help-block
       .control-group
         .control-label password (again)
         .controls
-          input(type="password")
-          span.help-block in case you're stupid
+          input#pw2(type="password",  name="password2")
+          span.help-block
       .control-group
         .control-label dorm
         .controls
-          select
-            option Canaday
-            option Claverly
-            option Hollis
-            option Hurlbut
-            option Lionel
-            option Mower
-            option Pennypacker
-            option Stoughton
-            option Straus
-            option Thayer
-            option Wigglesworth
-          span.help-block REPRESENT!
+          select(name="dorm")
+            each _dorm in dorms
+              if dorm == _dorm
+                option(selected="selected") #{_dorm}
+              else
+                option #{_dorm}
+          span.help-block
       .control-group
         .control-label i promise to only use my powers for good
         .controls
-          input(type="checkbox")
-          p.help-block veritas is built on honesty and respect.
-            | please don't be "that guy" (or girl).
+          if notevil
+            input#notevil(type="checkbox", name="notevil", checked)
+          else 
+            input#notevil(type="checkbox", name="notevil")
+          span.help-block
+          br
+          i
+            small
+              | veritas is built on honesty and respect.
+              | please don't be "that guy" (or girl).
       br
-      submit.btn.btn-success.pull-right Goooooooo!
+      input#go.btn.btn-success.pull-right(type="submit", value="Goooooooo!", disabled)
+
+:coffeescript
+  supform = $("#supform")
+  hid = $("#hid")
+  pw1 = $("#pw1")
+  pw2 = $("#pw2")
+  go = $("#go")
+  notevil = $("#notevil")
+
+  bitch = (e, message) ->
+    $e = $(e)
+    $e.parent().parent().addClass "error"
+    $e.siblings(".help-block").text message
+    go.prop('disabled', true)
+
+  chill = (e) ->
+    $e = $(e)
+    $e.parent().parent().removeClass "error"
+    $e.siblings(".help-block").text ''
+    enableIfKosher()
+
+  enableIfKosher = () ->
+    kosher = true
+    unless pw1.val().length > 5 
+      kosher = false
+    unless pw1.val() is pw2.val()
+      kosher = false
+    unless hid.val()
+      kosher = false
+    unless notevil.is ":checked"
+      kosher = false
+    $.post "/validate", hid: hid.val(), (data, textStatus) ->
+      unless data is "OK"
+        kosher = false
+      if kosher
+        go.prop('disabled', false)
+
+  validateHid = () ->
+
+  hid.blur (e) ->
+    if not hid.val()
+      bitch e.target, "Harvard ID can't be blank"
+    else
+      $.post "/validate", hid: hid.val(), (data, textStatus) ->
+        if data is "OK"
+          chill e.target
+        else
+          bitch e.target, "invalid Harvard ID"
+      chill e.target
+
+  pw1.blur (e) ->
+    if not pw1.val()
+      bitch e.target, "password can't be blank"
+    else
+      if pw1.val().length <= 5
+        bitch e.target, "password must be > 5 characters"
+      else
+        chill e.target
+
+  pw2.blur (e) ->
+    if pw1.val() isnt pw2.val()
+      bitch e.target, "password didn't match"
+    else
+      chill e.target
+
+  notevil.click (e) ->
+    if notevil.is ":checked"
+      chill e.target
+    else
+      bitch e.target, "come on dude, seriously?"
+
+  go.click (e) ->
+    go.val("Going...")
+    go.prop('disabled', true)
+    supform.submit()
