@@ -51,31 +51,36 @@ ensureSession = (req, res, next) ->
     next()
 
 app.get "/", (req, res) ->
+  username = req.session.username
+  if username
+    res.redirect "/app"
   res.render "index"
-    failed: false
+    appmode: false
 
 app.post "/", (req, res) ->
   email = req.body.email
   password = req.body.password
   whence = req.query.whence
  
-# app.get "/about", (req, res) ->
-#   res.render "about"
-#     appmode: false
+app.get "/what", (req, res) ->
+  res.render "what"
+    appmode: false
 
-# app.get "/help", (req, res) ->
-#   res.render "help"
-#     appmode: false
+app.get "/who", (req, res) ->
+  res.render "who"
+    appmode: false
 
-# app.get "/feedback", (req, res) ->
-#   jbha.Client.read_feedbacks (err, feedbacks) ->
-#     res.render "feedback"
-#       feedbacks: feedbacks
-#       appmode: false
+app.get "/up", (req, res) ->
+  res.render "up"
+    appmode: false
 
-# app.get "/logout", (req, res) ->
-#   req.session.destroy()
-#   res.redirect "/"
+app.get "/in", (req, res) ->
+  res.render "in"
+    appmode: false
+
+app.get "/out", (req, res) ->
+  req.session.destroy()
+  res.redirect "/"
 
 # app.get "/setup", ensureSession, (req, res) ->
 #   if req.settings.is_new

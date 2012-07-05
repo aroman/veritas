@@ -23,30 +23,34 @@ html(lang='en')
           //- TODO: logo
           //- img.block-icon(src="/img/veritas.jpg")
           .centex
-            a.brand.brand-custom(href="/") VERITAS
+            a.brand.brand-custom(href="/") &laquo; VERITAS &raquo;
+            if appmode
+              ul.nav.pull-left
+                li.nav-link
+                  a(href="/messages") the lounge
+                li.nav-link
+                  a(href="/messages") messages
             ul.nav.pull-right
               li.nav-link
                 a(href="/what") what?
               li.nav-link
-                a(href="/help") who?
+                a(href="/who") who?
                         
     script(src='/js/lib/jquery.js')
     script(src='/js/lib/jquery-ui.min.js')
     script(src='/js/lib/bootstrap.js')
-    script(src='/js/lib/bootstrap-datepicker.js')
-    script(src='/js/lib/bootstrap-datepicker-static.js')
-    //- if appmode
-    //-   // Libraries
-    //-   //- script(src='/socket.io/socket.io.js')
-    //-   //- script(src='/js/lib/moment.js')
-    //-   //- script(src='/js/lib/keymaster.js')
-    //-   //- script(src='/js/lib/underscore.js')
-    //-   //- script(src='/js/lib/backbone.js')
-    //-   //- script(src='/js/lib/backbone-relational.js')
-    //-   //- script(src='/js/lib/backbone-query.js')
-    //-   //- script(src='/js/lib/backbone-iobind.js')
-    //-   //- script(src='/js/lib/backbone-iosync.js')
-    //-   //- script(src='/js/lib/handlebars.runtime.js')
-    //-   //- script(src='/js/templates.min.js')
+    if appmode
+      // Libraries
+      //- script(src='/socket.io/socket.io.js')
+      //- script(src='/js/lib/moment.js')
+      //- script(src='/js/lib/keymaster.js')
+      //- script(src='/js/lib/underscore.js')
+      //- script(src='/js/lib/backbone.js')
+      //- script(src='/js/lib/backbone-relational.js')
+      //- script(src='/js/lib/backbone-query.js')
+      //- script(src='/js/lib/backbone-iobind.js')
+      //- script(src='/js/lib/backbone-iosync.js')
+      //- script(src='/js/lib/handlebars.runtime.js')
+      //- script(src='/js/templates.min.js')
     !{body}
     include footer

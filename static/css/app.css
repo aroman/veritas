@@ -9,9 +9,6 @@ html, body {
 body {
   padding-top: 100px;
   padding-bottom: 40px;
-}
-
-p {
   font-family: "Happy Monkey";
 }
 
@@ -30,6 +27,10 @@ a:hover {
 
 .hero-unit {
   margin-top: 20px;
+}
+
+.btn-spaced {
+  margin: 10px;
 }
 
 .brand-custom {
