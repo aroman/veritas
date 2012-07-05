@@ -1,0 +1,85 @@
+!!! 5
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="description", content="The New SSocial Network")
+    meta(name="author", content="Avi Romanoff")
+    title veritas
+    //if lt IE 9
+      script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+    // TODO: A "V" as an icon.
+    //- link(rel="shortcut icon", type="img/png", href="/img/glyph/zap.png")
+    link(rel='stylesheet', href='/css/bootstrap.superhero.min.css')
+    //- link(rel='stylesheet', href='/css/bootstrap-datepicker.css')
+    //- link(rel='stylesheet', href='/css/app.css')
+    link(rel='stylesheet', href='/css/bootstrap-responsive.min.css')
+    // TODO: Google Analytics
+
+  body
+    .navbar.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          //- TODO: logo
+          //- img.block-icon(src="/img/veritas.jpg")
+          a.brand(href="/") VERITAS
+          .nav-collapse
+            l.nav.pull-left
+              li.nav-link
+                a(href="/what") what?
+              li.nav-link
+                a(href="/help") who?
+            //- if appmode
+            //-   ul.nav.pull-right
+            //-     li.dropdown(data-dropdown='dropdown')
+            //-       a#sort-dropdown.dropdown-toggle(target='_self', data-toggle="dropdown", data-bypass, href='#')
+            //-         | Options
+            //-         b.caret
+            //-       ul.dropdown-menu
+            //-         li
+            //-           a#toggle-archived(target='_self', href="") Show archived
+            //-         li
+            //-           a#toggle-details(target='_self', href="") Show details
+            //-         li.divider
+            //-         li
+            //-           a#settings(href="settings", data-bypass) 
+            //-             i.icon-wrench
+            //-             |  Settings
+            //-         li
+            //-           a#shortcuts(href="shortcuts", data-bypass) 
+            //-             i.icon-list-alt
+            //-             |  Shortcuts
+            //-         li
+            //-           a#force-refresh(target='_self', href="", data-bypass)
+            //-             i.icon-refresh
+            //-             |  Refresh
+            //-         li.divider
+            //-         li
+            //-           a#logout(target='_self', href='/logout', data-bypass)
+            //-             i.icon-off
+            //-             |  Log out
+                        
+    script(src='/js/lib/jquery.js')
+    script(src='/js/lib/jquery-ui.min.js')
+    script(src='/js/lib/bootstrap.js')
+    script(src='/js/lib/bootstrap-datepicker.js')
+    script(src='/js/lib/bootstrap-datepicker-static.js')
+    //- if appmode
+    //-   // Libraries
+    //-   //- script(src='/socket.io/socket.io.js')
+    //-   //- script(src='/js/lib/moment.js')
+    //-   //- script(src='/js/lib/keymaster.js')
+    //-   //- script(src='/js/lib/underscore.js')
+    //-   //- script(src='/js/lib/backbone.js')
+    //-   //- script(src='/js/lib/backbone-relational.js')
+    //-   //- script(src='/js/lib/backbone-query.js')
+    //-   //- script(src='/js/lib/backbone-iobind.js')
+    //-   //- script(src='/js/lib/backbone-iosync.js')
+    //-   //- script(src='/js/lib/handlebars.runtime.js')
+    //-   //- script(src='/js/templates.min.js')
+    !{body}
+    include footer
