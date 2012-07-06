@@ -31,8 +31,11 @@ M.AccountSchema = new mongoose.Schema
   hid:
     type: Number
     required: true
-    index:
-      unique: true
+    unique: true
+  username:
+    type: String
+    required: true
+    unique: true
   password:
     type: String
     required: true

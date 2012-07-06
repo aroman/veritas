@@ -49,13 +49,13 @@ app.dynamicHelpers
     return package_info.version
 
 ensureSession = (req, res, next) ->
-  if not req.session.hid
+  if not req.session.username
     res.redirect "/?whence=#{req.url}"
   else
     next()
 
 app.get "/", (req, res) ->
-  if req.session.hid
+  if req.session.username
     res.redirect "/lounge"
   else
     res.render "index"
@@ -63,26 +63,28 @@ app.get "/", (req, res) ->
  
 app.get "/what", (req, res) ->
   res.render "what"
-    appmode: req.session.hid
+    appmode: req.session.username
 
 app.get "/who", (req, res) ->
   res.render "who"
-    appmode: req.session.hid
+    appmode: req.session.username
 
 app.get "/up", (req, res) ->
-  if req.session.hid
+  if req.session.username
     res.redirect "/lounge"
   else
     res.render "up"
       appmode: false
       failed: false
       dorms: models.DORMS
-      dorm: 'derp'
+      dorm: ''
       notevil: ''
+      username: ''
       hid: ''
 
 app.post "/up", (req, res) ->
   hid = req.body.hid or ''
+  username = req.body.username
   password1 = req.body.password1
   password2 = req.body.password2
   dorm = req.body.dorm
@@ -96,10 +98,15 @@ app.post "/up", (req, res) ->
       hid: hid
       dorm: dorm
       notevil: notevil
+      username: username
 
   if password1 isnt password2
     fail()
+  else if username < 5 or username > 18
+    fail()
   else if password1.length < 5
+    fail()
+  else if " " in username
     fail()
   else if _.isUndefined(notevil)
     fail()
@@ -110,6 +117,7 @@ app.post "/up", (req, res) ->
   else
     account = new models.Account()
     account.hid = Number(hid)
+    account.username = username
     account.password = password1
     account.dorm = dorm
     account.save (err) ->
@@ -122,27 +130,27 @@ app.get "/in", (req, res) ->
   res.render "in"
     appmode: false
     failed: false
-    hid: ''
+    username: ''
 
 app.post "/in", (req, res) ->
-  hid = req.body.hid or ''
+  username = req.body.username or ''
   password = req.body.password
 
   fail = () ->
     res.render "in"
       appmode: false
       failed: true
-      hid: hid
+      username: username
 
   models.Account
     .findOne()
-    .where("hid", hid)
+    .where("username", username)
     .run (err, account) ->
       if err or not account
         fail()
       else
         if pwh.verify(password, account.password)
-          req.session.hid = hid
+          req.session.username = username
           res.redirect "/lounge"
         else
           fail()
@@ -157,6 +165,17 @@ app.post "/validate", (req, res) ->
     res.send "OK"
   else
     res.send "BUT SIRRR"
+
+app.post "/username", (req, res) ->
+  username = req.body.username
+  models.Account
+    .findOne()
+    .where("username", username)
+    .run (err, account) ->
+      if account
+        res.send "umad?"
+      else
+        res.send "OK"
 
 app.get "/lounge*", ensureSession, (req, res) ->
   res.render "lounge"

@@ -1,4 +1,4 @@
-.container
+.content
   .hero-unit
     form#supform.form-horizontal(action="", method="POST")
       legend Sign up
@@ -7,6 +7,11 @@
           | Hmm, couldn't create your account.
           | Try again or contact Avi.
         br
+      .control-group
+        .control-label username
+        .controls
+          input#username(type="text", name="username", value=username)
+          span.help-block
       .control-group
         .control-label Harvard ID
         .controls
@@ -51,6 +56,7 @@
 :coffeescript
   supform = $("#supform")
   hid = $("#hid")
+  username = $("#username")
   pw1 = $("#pw1")
   pw2 = $("#pw2")
   go = $("#go")
@@ -69,33 +75,45 @@
     enableIfKosher()
 
   enableIfKosher = () ->
-    kosher = true
-    unless pw1.val().length > 5 
-      kosher = false
-    unless pw1.val() is pw2.val()
-      kosher = false
-    unless hid.val()
-      kosher = false
-    unless notevil.is ":checked"
-      kosher = false
-    $.post "/validate", hid: hid.val(), (data, textStatus) ->
-      unless data is "OK"
-        kosher = false
-      if kosher
-        go.prop('disabled', false)
-
-  validateHid = () ->
+    len = username.val().length 
+    return unless pw1.val().length > 5
+    return unless pw1.val() is pw2.val()
+    return unless len > 5 and len < 18
+    return unless " " not in username.val()
+    return unless hid.val()
+    return unless notevil.is ":checked"
+    $.post "/validate", hid: hid.val(), (data) ->
+      return unless data is "OK"
+    $.post "/username", username: username.val(), (data) ->
+      return unless data is "OK"
+    go.prop('disabled', false)
 
   hid.blur (e) ->
     if not hid.val()
       bitch e.target, "Harvard ID can't be blank"
     else
-      $.post "/validate", hid: hid.val(), (data, textStatus) ->
+      $.post "/validate", hid: hid.val(), (data) ->
         if data is "OK"
           chill e.target
         else
           bitch e.target, "invalid Harvard ID"
       chill e.target
+
+  username.blur (e) ->
+    if not username.val()
+      bitch e.target, "username can't be blank"
+    else if " " in username.val()
+      bitch e.target, "username can't contain spaces"
+    else
+      len = username.val().length 
+      if len < 5 or len > 18
+        bitch e.target, "username must be between 5 and 18 characters"
+      else
+        $.post "/username", username: username.val(), (data) ->
+          if data is "OK"
+            chill e.target
+          else
+            bitch e.target, "username already taken"
 
   pw1.blur (e) ->
     if not pw1.val()
