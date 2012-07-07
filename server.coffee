@@ -191,7 +191,10 @@ app.get "/lounge*", ensureSession, (req, res) ->
         .where("username", username)
         .run cb
     (cb) ->
-      models.Group.find {}, cb
+      models.Group
+        .find()
+        .populate("members", ["username"])
+        .run cb
     (cb) ->
       models.Person.find {}, cb
   ],
@@ -240,7 +243,7 @@ io.sockets.on "connection", (socket) ->
   # EXCEPT the one that initiated the sync.
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
-    socket.broadcast.to(token.username).emit(event_name, data)
+    io.sockets.emit event_name, data
 
   # Broadcasts a message to all connected sessions,
   # INCLUDING the one that initiated the message.
@@ -269,6 +272,27 @@ io.sockets.on "connection", (socket) ->
       console.log group + " saved!"
       socket.broadcast.emit "groups:add", group
       cb err, group
+
+  socket.on "group:message", (group_id, body, cb) ->
+    console.log "group:message received!"
+    async.waterfall [
+      (wf_callback) ->
+        models.Group
+          .findOne()
+          .where("_id", group_id)
+          .run wf_callback
+      (group, wf_callback) ->
+        message =
+          username: username
+          body: body
+        group.messages.push message
+        group.save (err) ->
+          wf_callback err, group
+    ],
+    (err, group) ->
+      console.log "Message saved!"
+      sync "group", "update", group
+      cb err
 
   socket.on "disconnect", () ->
     online[username]--

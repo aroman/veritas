@@ -4,7 +4,30 @@
   window.Router = Backbone.Router.extend({
     current_view: null,
     routes: {
-      "": "home"
+      "": "home",
+      "groups/:id": "group"
+    },
+    initialize: function() {
+      return this.home();
+    },
+    home: function() {
+      if (!_.isNull(this.current_view)) {
+        this.current_view.remove();
+      }
+      return this.current_view = new FinderView();
+    },
+    group: function(id) {
+      var group;
+      group = groups.get(id);
+      if (!group) {
+        alert("YOU EEEEDIOT! That group doesn't exist!!1one!");
+      }
+      if (!_.isNull(this.current_view)) {
+        this.current_view.remove();
+      }
+      return this.current_view = new GroupView({
+        model: group
+      });
     }
   });
 

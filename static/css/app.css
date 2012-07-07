@@ -36,6 +36,31 @@ body, input, select {
   border-radius: 15px;
 }
 
+#finder {
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+#group {
+  position: relative;
+}
+
+#messages {
+  text-align: left;
+  overflow: auto;
+  height: 300px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+b {
+  color: red;
+}
+
+#chat-input {
+  width: 95%;
+}
+
 .btn-spaced {
   margin: 10px;
 }
@@ -92,8 +117,6 @@ h3 small {
   text-align: center;
   background-color: #4C5663;
   border-radius: 6px;
-  padding-top: 50px;
-  padding-bottom: 50px;
   margin-bottom: 25px;
   /*width: 58.446809% !important;*/
 }

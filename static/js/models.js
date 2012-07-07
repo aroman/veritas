@@ -11,6 +11,7 @@
 
   window.Groups = Backbone.Collection.extend({
     url: "groups",
+    model: Group,
     initialize: function() {
       var _this = this;
       return this.ioBind('add', function(group) {

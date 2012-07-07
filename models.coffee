@@ -64,6 +64,18 @@ M.PersonSchema = new mongoose.Schema
 
 M.Person = mongoose.model 'person', M.PersonSchema
 
+M.MessageSchema = new mongoose.Schema
+  username: String
+  body:
+    type: String
+    required: true
+  date:
+    type: Date
+    required: true
+    default: Date.now()
+
+M.Message = mongoose.model 'message', M.MessageSchema
+
 M.GroupSchema = new mongoose.Schema
   name:
     type: String
@@ -73,6 +85,7 @@ M.GroupSchema = new mongoose.Schema
     type: Date
     required: true
     default: Date.now()
+  messages: [M.MessageSchema]
   members:
     [
       type: mongoose.Schema.ObjectId

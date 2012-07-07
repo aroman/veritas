@@ -8,6 +8,7 @@ window.Group = Backbone.Model.extend
 window.Groups = Backbone.Collection.extend
 
   url: "groups"
+  model: Group
 
   initialize: () ->
     @ioBind 'add', (group) =>
