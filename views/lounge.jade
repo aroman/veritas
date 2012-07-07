@@ -1,4 +1,31 @@
-.container
-  .hero-unit
-    .centex
-      input#thebox.input-xlarge.search-query(type="text", placeholder="What do you like to do?")
+.container-fluid
+  .row-fluid
+    .span3.groups-span
+      ul#groups.nav.nav-list
+    .span6.main-span
+      #finder
+        input#thebox.input-xlarge.search-query(type="text", autofocus, placeholder="What floats your boat?")
+        br
+        br
+        br
+        #results
+      #chat
+    .span3.people-span
+      ul#people.nav.nav-list
+
+script(src='/js/routes.js')
+script(src='/js/models.js')
+script(src='/js/views.js')
+script
+  window.router = new Router()
+  window.socket = io.connect()
+
+  window.groups = new Groups(!{groups_bootstrap});
+
+  window.app = new AppView()
+  window.app.updatePersonList(!{online})
+
+  Backbone.history.start({
+    pushState: true,
+    root: "/lounge/"
+  })

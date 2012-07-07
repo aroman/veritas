@@ -86,7 +86,7 @@
       return unless data is "OK"
     $.post "/username", username: username.val(), (data) ->
       return unless data is "OK"
-    go.prop('disabled', false)
+    go.prop 'disabled', false
 
   hid.blur (e) ->
     if not hid.val()
@@ -137,6 +137,6 @@
       bitch e.target, "come on dude, seriously?"
 
   go.click (e) ->
-    go.val("Going...")
-    go.prop('disabled', true)
+    go.val "Going..."
+    go.prop 'disabled', true
     supform.submit()

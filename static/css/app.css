@@ -9,13 +9,31 @@ body, input, select {
   font-family: "Happy Monkey";
 }
 
-.nav-link:hover , .brand:hover {
+.nav-link:hover, .brand:hover {
   text-decoration: overline !important;
 }
 
 .navbar .brand {
   float: none;
   font-size: 33px;
+}
+
+.help-block {
+  opacity: 1;
+}
+
+.nav-header {
+  font-size: 15px !important;
+  text-align: center;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+#thebox {
+  height: 40px;
+  width: 300px;
+  font-size: 20px;
+  border-radius: 15px;
 }
 
 .btn-spaced {
@@ -31,6 +49,7 @@ body, input, select {
 
 .control-group.error .checkbox, .control-group.error .radio, .control-group.error input, .control-group.error select, .control-group.error textarea {
   border: 2px solid;
+  box-shadow: 0 0 5px #EE7979;
 }
 
 .centex {
@@ -61,6 +80,44 @@ h1#welcome-message {
   font-size: 50px;
 }
 
-h3 small {
   color: #777;
+h3 small {
+}
+
+.footer {
+  margin-top: 50px; 
+}
+
+.main-span {
+  text-align: center;
+  background-color: #4C5663;
+  border-radius: 6px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+  margin-bottom: 25px;
+  /*width: 58.446809% !important;*/
+}
+
+.groups-span, .people-span {
+  background-color: #45515F;
+  border-radius: 6px;
+  padding-top: 10px;
+  padding-bottom: 50px;
+  margin-bottom: 25px;
+}
+/*
+.groups-span {
+  width: 16.89361702% !important;
+}
+
+.people-span {
+  width: 20.404255% !important;
+}
+*/
+textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-input:focus {
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 35px rgba(82, 168, 236, .6);
+}
+
+.control-group.error .checkbox:focus, .control-group.error .radio:focus, .control-group.error input:focus, .control-group.error select:focus, .control-group.error textarea:focus {
+  box-shadow: 0 0 25px #EE7979;
 }

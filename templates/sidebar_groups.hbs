@@ -1,0 +1,11 @@
+<ul class="nav nav-list">
+  <li class="nav-header">» groups «</li>
+  {{#unless groups}}
+    <i>No groups :(</i>
+  {{/unless}}
+  {{#each groups}}
+    <li>
+      <a href="/groups/{{_id}}" data-route> {{name}}</a>
+    </li>
+  {{/each}}
+</ul>

@@ -13,6 +13,7 @@
     "cheerio": "0.7.0",
     "colors": "0.6.0",
     "connect": "2.2.2",
+    "connect-handlebars": "0.0.5",
     "connect-mongo": "0.1.9",
     "express": "2.5.9",
     "jade": "0.26.1",

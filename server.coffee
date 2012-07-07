@@ -4,13 +4,15 @@ _          = require "underscore"
 fs         = require "fs"
 os         = require "os"
 pwh        = require "password-hash"
+chbs       = require "connect-handlebars"
+async      = require "async"
 colors     = require "colors"
 connect    = require "connect"
 express    = require "express"
 socketio   = require "socket.io"
 MongoStore = require("connect-mongo")(express)
 
-models    = require "./models"
+models     = require "./models"
 secrets    = require "./secrets"
 
 package_info = JSON.parse(fs.readFileSync "#{__dirname}/package.json", "utf-8")
@@ -30,6 +32,8 @@ sessionStore = new MongoStore
     console.log "    \\ TAS /".red
     console.log "     \\___/".red
 
+online = {}
+
 app.configure ->
   app.use express.cookieParser()
   app.use express.bodyParser()
@@ -40,6 +44,7 @@ app.configure ->
   app.use app.router
   app.use express.static "#{__dirname}/static"
   app.use express.errorHandler(dumpExceptions: true, showStack: true)
+  app.use "/js/templates.js", chbs("#{__dirname}/templates", exts: ['hbs'])
   app.set 'jsonp callback'
   app.set 'view engine', 'jade'
   app.set 'views', "#{__dirname}/views"
@@ -115,12 +120,12 @@ app.post "/up", (req, res) ->
   else if hid[3..4] isnt "66" or hid.length isnt 8
     fail()
   else
-    account = new models.Account()
-    account.hid = Number(hid)
-    account.username = username
-    account.password = password1
-    account.dorm = dorm
-    account.save (err) ->
+    person = new models.Person()
+    person.hid = Number(hid)
+    person.username = username
+    person.password = password1
+    person.dorm = dorm
+    person.save (err) ->
       if err
         fail()
       else
@@ -142,14 +147,14 @@ app.post "/in", (req, res) ->
       failed: true
       username: username
 
-  models.Account
+  models.Person
     .findOne()
     .where("username", username)
-    .run (err, account) ->
-      if err or not account
+    .run (err, person) ->
+      if err or not person
         fail()
       else
-        if pwh.verify(password, account.password)
+        if pwh.verify(password, person.password)
           req.session.username = username
           res.redirect "/lounge"
         else
@@ -168,18 +173,43 @@ app.post "/validate", (req, res) ->
 
 app.post "/username", (req, res) ->
   username = req.body.username
-  models.Account
+  models.Person
     .findOne()
     .where("username", username)
-    .run (err, account) ->
-      if account
+    .run (err, person) ->
+      if person
         res.send "umad?"
       else
         res.send "OK"
 
 app.get "/lounge*", ensureSession, (req, res) ->
-  res.render "lounge"
-    appmode: true
+  username = req.session.username
+  async.parallel [
+    (cb) ->
+      models.Person
+        .findOne()
+        .where("username", username)
+        .run cb
+    (cb) ->
+      models.Group.find {}, cb
+    (cb) ->
+      models.Person.find {}, cb
+  ],
+  (err, results) ->
+    if err
+      res.render "error"
+    else
+      # Copy the online list and add ourselves
+      # to a local copy of it for bootstrap sake
+      # if needed. (Initial page req.)
+      _online = _.clone online
+      unless _.has _online, username
+        _online[username] = 1
+      res.render "lounge"
+        appmode: true
+        me: results[0]
+        groups_bootstrap: JSON.stringify results[1]
+        online: JSON.stringify _.keys(_online)
 
 io.set "authorization", (data, accept) ->
   if data.headers.cookie
@@ -191,30 +221,57 @@ io.set "authorization", (data, accept) ->
         accept err.message.toString(), false
       else
         data.session = new connect.middleware.session.Session data, session
-        if not data.session.token
-          accept "No session token", false
-        else
-          accept null, true
+        accept null, true
   else
     accept "No cookie transmitted.", false
 
 io.sockets.on "connection", (socket) ->
-  token = socket.handshake.session.token
-  socket.join token.username
+  username = socket.handshake.session.username
+  socket.join username
 
-  # # Syncs model state to all connected sessions,
-  # # EXCEPT the one that initiated the sync.
-  # sync = (model, method, data) ->
-  #   event_name = "#{model}/#{data._id}:#{method}"
-  #   socket.broadcast.to(token.username).emit(event_name, data)
+  if _.has online, username
+    online[username]++
+  else
+    online[username] = 1
+
+  socket.broadcast.emit "online", _.keys(online)
+
+  # Syncs model state to all connected sessions,
+  # EXCEPT the one that initiated the sync.
+  sync = (model, method, data) ->
+    event_name = "#{model}/#{data._id}:#{method}"
+    socket.broadcast.to(token.username).emit(event_name, data)
 
   # Broadcasts a message to all connected sessions,
   # INCLUDING the one that initiated the message.
   # broadcast = (message, data) ->
   #   io.sockets.in(token.username).emit(message, data)
 
-  # socket.on "course:create", (data, cb) ->
-  #   return unless _.isFunction cb
-  #   jbha.Client.create_course token, data, (err, course) ->
-  #     socket.broadcast.to(token.username).emit("courses:create", course)
-  #     cb null, course
+  socket.on "group:create", (data, cb) ->
+    async.waterfall [
+      (wf_callback) ->
+        models.Person
+          .findOne()
+          .where("username", username)
+          .run wf_callback
+      (account, wf_callback) ->
+        group = new models.Group()
+        group.name = data.name
+        group.members.push account
+        group.save (err, group) ->
+          wf_callback err, account, group
+      (account, group, wf_callback) ->
+        account.groups.push group
+        account.save (err, account) ->
+          wf_callback err, group
+    ],
+    (err, group) ->
+      console.log group + " saved!"
+      socket.broadcast.emit "groups:add", group
+      cb err, group
+
+  socket.on "disconnect", () ->
+    online[username]--
+    if online[username] is 0
+      delete online[username]
+    socket.broadcast.emit "online", _.keys(online)

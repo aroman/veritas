@@ -27,7 +27,7 @@ M.DORMS = [
           "Wigglesworth"
         ]
 
-M.AccountSchema = new mongoose.Schema
+M.PersonSchema = new mongoose.Schema
   hid:
     type: Number
     required: true
@@ -41,7 +41,7 @@ M.AccountSchema = new mongoose.Schema
     required: true
     set: (raw) ->
       pwh.generate(raw)
-  date_created:
+  joined:
     type: Date
     required: true
     default: Date.now()
@@ -49,14 +49,36 @@ M.AccountSchema = new mongoose.Schema
     type: Boolean
     required: true
     default: true
-
   dorm:
     type: String
     required: true
     enum: M.DORMS
 
+  groups:
+    [
+      type: mongoose.Schema.ObjectId
+      ref: 'group'
+    ]
+
   nickname: String
 
-M.Account = mongoose.model 'account', M.AccountSchema
+M.Person = mongoose.model 'person', M.PersonSchema
+
+M.GroupSchema = new mongoose.Schema
+  name:
+    type: String
+    required: true
+    unique: true
+  created:
+    type: Date
+    required: true
+    default: Date.now()
+  members:
+    [
+      type: mongoose.Schema.ObjectId
+      ref: 'person'
+    ]
+
+M.Group = mongoose.model 'group', M.GroupSchema
 
 module.exports = M

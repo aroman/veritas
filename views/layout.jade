@@ -24,35 +24,36 @@ html(lang='en')
           //- img.block-icon(src="/img/veritas.jpg")
           .centex
             a.brand.brand-custom(href="/") &laquo; VERITAS &raquo;
-            if appmode
-              ul.nav.pull-left
+            .navbar-bg
+              if appmode
+                ul.nav.pull-left
+                  li.nav-link
+                    a(href="/lounge") the lounge
+                  li.nav-link
+                    a(href="/people/#{me.username}") profile
+                  li.nav-link
+                    a(href="/out") log out
+              ul.nav.pull-right
                 li.nav-link
-                  a(href="/lounge") the lounge
+                  a(href="/what") what?
                 li.nav-link
-                  a(href="/profile") profile
-                li.nav-link
-                  a(href="/out") log out
-            ul.nav.pull-right
-              li.nav-link
-                a(href="/what") what?
-              li.nav-link
-                a(href="/who") who?
+                  a(href="/who") who?
                         
     script(src='/js/lib/jquery.js')
     script(src='/js/lib/jquery-ui.min.js')
     script(src='/js/lib/bootstrap.js')
     if appmode
       // Libraries
-      //- script(src='/socket.io/socket.io.js')
-      //- script(src='/js/lib/moment.js')
-      //- script(src='/js/lib/keymaster.js')
-      //- script(src='/js/lib/underscore.js')
-      //- script(src='/js/lib/backbone.js')
+      script(src='/socket.io/socket.io.js')
+      script(src='/js/lib/moment.js')
+      script(src='/js/lib/keymaster.js')
+      script(src='/js/lib/underscore.js')
+      script(src='/js/lib/backbone.js')
       //- script(src='/js/lib/backbone-relational.js')
       //- script(src='/js/lib/backbone-query.js')
-      //- script(src='/js/lib/backbone-iobind.js')
-      //- script(src='/js/lib/backbone-iosync.js')
-      //- script(src='/js/lib/handlebars.runtime.js')
-      //- script(src='/js/templates.min.js')
+      script(src='/js/lib/backbone-iobind.js')
+      script(src='/js/lib/backbone-iosync.js')
+      script(src='/js/lib/handlebars.runtime.js')
+      script(src='/js/templates.js')
     !{body}
     include footer

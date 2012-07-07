@@ -1,0 +1,11 @@
+<ul class="nav nav-list">
+  <li class="nav-header">» people «</li>
+  {{#unless people}}
+    <i>Nobody's online :(</i>
+  {{/unless}}
+  {{#each people}}
+    <li>
+      <a href="/people/{{this}}"> {{this}}</a>
+    </li>
+  {{/each}}
+</ul>
