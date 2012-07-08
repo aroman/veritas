@@ -12,6 +12,7 @@
       return this.render();
     },
     render: function() {
+      this.$el.show();
       return this.$el.html(Handlebars.templates.finder());
     },
     showGroups: function(models) {
@@ -20,13 +21,22 @@
       }));
     },
     createGroup: function(e) {
-      var group, name;
+      var error_cb, group, name, success_cb;
       name = $(e.target).data("name");
       group = new Group({
         name: name
       });
-      groups.add(group);
-      return group.save();
+      success_cb = function() {
+        groups.add(group);
+        return router.navigate("/groups/" + group.id, true);
+      };
+      error_cb = function() {
+        return alert("OH SHIT SOMETHING BROKE");
+      };
+      return group.save({}, {
+        success: success_cb,
+        error: error_cb
+      });
     },
     search: function(e) {
       var fragment, matches;
@@ -45,6 +55,11 @@
       } else {
         return this.$("#results").html("Start typing <3");
       }
+    },
+    remove: function() {
+      this.$el.hide();
+      this.$el.children().remove();
+      return this;
     }
   });
 
@@ -57,13 +72,14 @@
     initialize: function() {
       var _this = this;
       this.render();
-      return this.model.on("change:messages", function() {
+      return this.model.on("newmessage", function() {
         return _this.render();
       });
     },
     render: function() {
+      this.$el.show();
       this.$el.html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
-      return this.$("#messages").scrollTop(this.$("#messages").prop("scrollHeight"));
+      return this.$("#messages").scrollTop(1234567890);
     },
     colorize: function(group) {
       var colorized,
@@ -82,17 +98,27 @@
       return group;
     },
     addMessage: function(e) {
-      var message;
+      var message,
+        _this = this;
       if (e.keyCode === 13) {
         message = this.$(e.target).val();
-        console.log(message);
-        return socket.emit("group:message", this.model.id, message, function(err, res) {
-          if (err) {
-            alert("FUCK FUCK SOMETHING BROKE OH SHIT");
-            return this.$el.html(Handlebars.templates.group(this.model.toJSON()));
-          }
-        });
+        if (message) {
+          return socket.emit("group:message", this.model.id, message, function(err, res) {
+            if (err) {
+              return alert("FUCK FUCK SOMETHING BROKE OH SHIT");
+            } else {
+              return _this.render;
+            }
+          });
+        }
       }
+    },
+    remove: function() {
+      this.$el.hide();
+      this.$el.children().remove();
+      this.undelegateEvents();
+      this.model.off("change:messages");
+      return this;
     }
   });
 
@@ -105,6 +131,7 @@
     initialize: function() {
       var _this = this;
       this.updateGroupList();
+      router.on('highlight', this.highlightSidebar, this);
       groups.on("add remove", this.updateGroupList, this);
       return socket.on("online", function(people) {
         return _this.updatePersonList(people);
@@ -131,6 +158,10 @@
       return this.$("#people").html(Handlebars.templates.sidebar_people({
         people: people
       }));
+    },
+    highlightSidebar: function() {
+      this.$('li.active:not(.nav-link)').removeClass('active');
+      return this.$("a[href='/" + Backbone.history.fragment + "']").parent().addClass('active');
     }
   });
 

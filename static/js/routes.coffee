@@ -3,14 +3,15 @@ window.Router = Backbone.Router.extend
   current_view: null
 
   routes:
-    "":               "home"
+    "":               "find"
+    "find":           "find"
     "groups/:id":     "group"
 
   initialize: () ->
-    @home()
+    # @find()
 
-  home: () ->
-    unless _.isNull this.current_view
+  find: () ->
+    unless _.isNull @current_view
       @current_view.remove()
 
     @current_view = new FinderView()    
@@ -21,7 +22,8 @@ window.Router = Backbone.Router.extend
     if not group
       alert "YOU EEEEDIOT! That group doesn't exist!!1one!"
 
-    unless _.isNull this.current_view
+    unless _.isNull @current_view
       @current_view.remove()
 
     @current_view = new GroupView model: group
+    @trigger "highlight"

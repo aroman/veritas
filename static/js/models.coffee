@@ -4,6 +4,9 @@ window.Group = Backbone.Model.extend
 
   initialize: () ->
     @ioBind 'update', this.set
+    socket.on "group/#{@id}:message", (message) =>
+      @get('messages').push message
+      @trigger "newmessage"
 
 window.Groups = Backbone.Collection.extend
 
@@ -13,3 +16,6 @@ window.Groups = Backbone.Collection.extend
   initialize: () ->
     @ioBind 'add', (group) =>
       @add group
+
+  comparator: (group) ->
+    group.get "name"

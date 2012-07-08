@@ -4,13 +4,12 @@
   window.Router = Backbone.Router.extend({
     current_view: null,
     routes: {
-      "": "home",
+      "": "find",
+      "find": "find",
       "groups/:id": "group"
     },
-    initialize: function() {
-      return this.home();
-    },
-    home: function() {
+    initialize: function() {},
+    find: function() {
       if (!_.isNull(this.current_view)) {
         this.current_view.remove();
       }
@@ -25,9 +24,10 @@
       if (!_.isNull(this.current_view)) {
         this.current_view.remove();
       }
-      return this.current_view = new GroupView({
+      this.current_view = new GroupView({
         model: group
       });
+      return this.trigger("highlight");
     }
   });
 

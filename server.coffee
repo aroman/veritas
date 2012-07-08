@@ -214,6 +214,64 @@ app.get "/lounge*", ensureSession, (req, res) ->
         groups_bootstrap: JSON.stringify results[1]
         online: JSON.stringify _.keys(_online)
 
+curses = [
+  "fuck",
+  "shit",
+  "bitch",
+  "douche",
+  "cock",
+  "fag",
+  "faggot",
+  "nigger",
+  "cunt",
+  "whore",
+  "ass",
+  "dick",
+  "penis",
+  "vagina",
+  "pussy"
+]
+
+cleans = [
+  "squidward",
+  "jigglypuff",
+  "trollface",
+  "cowsaysmoo",
+  "soap",
+  "AGNRY FAIC",
+  "Sarah Palin",
+  "N00t G1ngr1ch",
+  "l.o.l",
+  "$#&!*#$*@&!&$",
+  "pikachu",
+  "creampuffs",
+  "mushrooms",
+  "Kleenex",
+  "POLAR BEARS",
+  "OVER 9000",
+  "supersain",
+  "deep",
+  "BUT SIRRR",
+  "DEEEEEEEEEEEEEEP",
+  "GREAT SUCCESS",
+  "chair",
+  "ductape",
+  "agua",
+  "חביטאח",
+  "watermellon",
+  "Wal-Mart",
+  "EXCEELLLENT",
+  "thorax",
+  "timmy",
+  "James"
+]
+
+cussFilter = (text) ->
+  for curse in curses
+    pattern = new RegExp curse, 'gi'
+    text = text.replace pattern, cleans[Math.floor(Math.random() * cleans.length)]
+  text
+
 io.set "authorization", (data, accept) ->
   if data.headers.cookie
     data.cookie = connect.utils.parseCookie data.headers.cookie
@@ -239,8 +297,6 @@ io.sockets.on "connection", (socket) ->
 
   socket.broadcast.emit "online", _.keys(online)
 
-  # Syncs model state to all connected sessions,
-  # EXCEPT the one that initiated the sync.
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
     io.sockets.emit event_name, data
@@ -284,14 +340,15 @@ io.sockets.on "connection", (socket) ->
       (group, wf_callback) ->
         message =
           username: username
-          body: body
+          body: cussFilter body
         group.messages.push message
         group.save (err) ->
-          wf_callback err, group
+          wf_callback err, group, message
     ],
-    (err, group) ->
+    (err, group, message) ->
       console.log "Message saved!"
-      sync "group", "update", group
+      event_name = "group/#{group._id}:message"
+      io.sockets.emit event_name, message
       cb err
 
   socket.on "disconnect", () ->

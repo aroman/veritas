@@ -5,7 +5,12 @@
     idAttribute: "_id",
     urlRoot: "group",
     initialize: function() {
-      return this.ioBind('update', this.set);
+      var _this = this;
+      this.ioBind('update', this.set);
+      return socket.on("group/" + this.id + ":message", function(message) {
+        _this.get('messages').push(message);
+        return _this.trigger("newmessage");
+      });
     }
   });
 
@@ -17,6 +22,9 @@
       return this.ioBind('add', function(group) {
         return _this.add(group);
       });
+    },
+    comparator: function(group) {
+      return group.get("name");
     }
   });
 

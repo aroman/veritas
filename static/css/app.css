@@ -48,13 +48,27 @@ body, input, select {
 #messages {
   text-align: left;
   overflow: auto;
-  height: 300px;
+  height: 350px;
   margin-right: 5px;
   margin-left: 5px;
 }
 
 b {
   color: red;
+}
+
+.btn-sidebar {
+  margin-bottom: 10px;
+
+}
+
+/* Fix overridden styles */
+.btn-sidebar.btn-info {
+  color: white;
+}
+
+.btn-sidebar.btn-info:hover {
+  background-color: #2F96B4;
 }
 
 #chat-input {

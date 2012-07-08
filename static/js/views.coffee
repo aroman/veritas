@@ -9,6 +9,7 @@ window.FinderView = Backbone.View.extend
     @render()
 
   render: () ->
+    @$el.show()
     @$el.html Handlebars.templates.finder()
 
   showGroups: (models) ->
@@ -17,8 +18,15 @@ window.FinderView = Backbone.View.extend
   createGroup: (e) ->
     name = $(e.target).data("name")
     group = new Group name: name
-    groups.add group
-    group.save()
+
+    success_cb = () ->
+      groups.add group
+      router.navigate "/groups/#{group.id}", true
+
+    error_cb = () ->
+      alert "OH SHIT SOMETHING BROKE"
+
+    group.save {}, {success: success_cb, error: error_cb}
 
   search: (e) ->
     fragment = @$("#thebox").val()
@@ -32,6 +40,11 @@ window.FinderView = Backbone.View.extend
     else
       @$("#results").html "Start typing <3"
 
+  remove: () ->
+   @$el.hide()
+   @$el.children().remove()
+   return @
+
 window.GroupView = Backbone.View.extend
   el: "#group"
   colors: {}
@@ -41,13 +54,14 @@ window.GroupView = Backbone.View.extend
 
   initialize: () ->
     @render()
-    @model.on "change:messages", () =>
+    @model.on "newmessage", () =>
       @render()
 
   render: () ->
+    @$el.show()
     @$el.html Handlebars.templates.group @colorize(@model.toJSON())
     # Scroll to the bottom
-    @$("#messages").scrollTop @$("#messages").prop("scrollHeight")
+    @$("#messages").scrollTop 1234567890
 
   colorize: (group) ->
     colorized = []
@@ -62,15 +76,22 @@ window.GroupView = Backbone.View.extend
     group.messages = colorized
     return group
 
-
   addMessage: (e) ->
     if e.keyCode is 13
       message = @$(e.target).val()
-      console.log message
-      socket.emit "group:message", @model.id, message, (err, res) ->
-        if err
-          alert("FUCK FUCK SOMETHING BROKE OH SHIT")
-          @$el.html Handlebars.templates.group @model.toJSON()
+      if message
+        socket.emit "group:message", @model.id, message, (err, res) =>
+          if err
+            alert "FUCK FUCK SOMETHING BROKE OH SHIT"
+          else
+            @render
+
+  remove: () ->
+    @$el.hide()
+    @$el.children().remove()
+    @undelegateEvents() 
+    @model.off "change:messages"
+    return @
 
 window.AppView = Backbone.View.extend
   el: "body"
@@ -81,6 +102,7 @@ window.AppView = Backbone.View.extend
 
   initialize: () ->
     @updateGroupList()
+    router.on 'highlight', this.highlightSidebar, this
     groups.on "add remove", @updateGroupList, this
     socket.on "online", (people) =>
       @updatePersonList people
@@ -107,3 +129,7 @@ window.AppView = Backbone.View.extend
 
   updatePersonList: (people) ->
     @$("#people").html Handlebars.templates.sidebar_people(people: people)
+
+  highlightSidebar: () ->
+    @$('li.active:not(.nav-link)').removeClass('active')
+    @$("a[href='/#{Backbone.history.fragment}']").parent().addClass('active')
