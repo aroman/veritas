@@ -123,8 +123,6 @@ window.GroupView = Backbone.View.extend
 
   initialize: () ->
     @render()
-    @model.on "newmessage", () =>
-      @render()
 
   render: () ->
     @$el.show()
@@ -132,19 +130,26 @@ window.GroupView = Backbone.View.extend
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
     @$("#chat-input").focus()
+    @model.set unread: 0
+    app.updateGroupList()
+
+  getColor: (username) ->
+    unless _.has @colors, username
+      @colors[username] = @color_bank[Math.floor(Math.random() * @color_bank.length)]
+    @colors[username]
 
   colorize: (group) ->
     colorized = []
     _.each group.messages, (message) =>
-      # color already assigned
-      if _.has @colors, message.username
-        message.color = @colors[message.username]
-      else
-        @colors[message.username] = @color_bank[Math.floor(Math.random() * @color_bank.length)]
-        message.color = @colors[message.username]
+      message.color = @getColor message.username
       colorized.push message
     group.messages = colorized
     return group
+
+  pushMessage: (message) ->
+    str = '<p><span style="color:'+@getColor(message.username)+'">'+message.username+': </span>'+message.body+'</p>'
+    @$("#messages").append(str)
+    @$("#messages").scrollTop 1234567890
 
   addMessage: (e) ->
     if e.keyCode is 13
@@ -161,7 +166,6 @@ window.GroupView = Backbone.View.extend
     @$el.hide()
     @$el.children().empty()
     @undelegateEvents() 
-    @model.off "change:messages"
     return @
 
 window.AppView = Backbone.View.extend
@@ -178,6 +182,16 @@ window.AppView = Backbone.View.extend
     socket.on "online", (people) =>
       console.log people
       @updatePersonList people
+    socket.on "message", (data) =>
+      group = groups.get data.group
+      group.get('messages').push data.message
+      if router.current_view.model.id is group.id
+        console.log "We're currently viewing this group"
+        router.current_view.pushMessage data.message
+      else
+        console.log "Not currently viewing"
+        group.set unread: group.get('unread') + 1
+        @updateGroupList()
 
   routeInternal: (e) ->
     target = $(e.target)
@@ -198,6 +212,7 @@ window.AppView = Backbone.View.extend
 
   updateGroupList: () ->
     @$("#groups").html Handlebars.templates.sidebar_groups(groups: groups.toJSON())
+    @highlightSidebar()
 
   updatePersonList: (people) ->
     @$("#people").html Handlebars.templates.sidebar_people(people: people)

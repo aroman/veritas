@@ -4,9 +4,11 @@ window.Group = Backbone.Model.extend
 
   initialize: () ->
     @ioBind 'update', this.set
-    socket.on "group/#{@id}:message", (message) =>
-      @get('messages').push message
-      @trigger "newmessage"
+    # We need to default this
+    # since the field doesn't
+    # exist server-side.
+    @set unread: 0
+
 
 window.Groups = Backbone.Collection.extend
 

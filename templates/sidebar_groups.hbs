@@ -9,7 +9,12 @@
   {{/unless}}
   {{#each groups}}
     <li>
-      <a href="/groups/{{_id}}" data-route> {{name}}</a>
+      <a href="/groups/{{_id}}" data-route>
+        {{#if unread}}
+          <span class="badge badge-important">{{unread}}</span>
+        {{/if}}
+        {{name}}
+      </a>
     </li>
   {{/each}}
 </ul>

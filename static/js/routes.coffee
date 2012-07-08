@@ -6,9 +6,6 @@ window.Router = Backbone.Router.extend
     "find/:kind":     "find"
     "groups/:id":     "group"
 
-  initialize: () ->
-    # @find()
-
   find: (kind) ->
     $('#welcome').hide()
 

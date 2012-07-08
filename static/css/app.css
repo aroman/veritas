@@ -55,6 +55,7 @@ body, input, select {
 #messages {
   text-align: left;
   overflow: auto;
+  word-wrap: break-word;
   height: 350px;
   margin-right: 5px;
   margin-left: 5px;

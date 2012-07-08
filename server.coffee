@@ -341,7 +341,7 @@ io.sockets.on "connection", (socket) ->
           wf_callback err, group, message
     ],
     (err, group, message) ->
-      io.sockets.emit "group/#{group._id}:message", message
+      io.sockets.emit "message", message: message, group: group._id
       cb err
 
   socket.on "disconnect", () ->

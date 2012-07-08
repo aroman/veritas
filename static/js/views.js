@@ -132,33 +132,40 @@
       "keyup #chat-input": "addMessage"
     },
     initialize: function() {
-      var _this = this;
-      this.render();
-      return this.model.on("newmessage", function() {
-        return _this.render();
-      });
+      return this.render();
     },
     render: function() {
       this.$el.show();
       this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
       this.$("#messages").scrollTop(1234567890);
-      return this.$("#chat-input").focus();
+      this.$("#chat-input").focus();
+      this.model.set({
+        unread: 0
+      });
+      return app.updateGroupList();
+    },
+    getColor: function(username) {
+      if (!_.has(this.colors, username)) {
+        this.colors[username] = this.color_bank[Math.floor(Math.random() * this.color_bank.length)];
+      }
+      return this.colors[username];
     },
     colorize: function(group) {
       var colorized,
         _this = this;
       colorized = [];
       _.each(group.messages, function(message) {
-        if (_.has(_this.colors, message.username)) {
-          message.color = _this.colors[message.username];
-        } else {
-          _this.colors[message.username] = _this.color_bank[Math.floor(Math.random() * _this.color_bank.length)];
-          message.color = _this.colors[message.username];
-        }
+        message.color = _this.getColor(message.username);
         return colorized.push(message);
       });
       group.messages = colorized;
       return group;
+    },
+    pushMessage: function(message) {
+      var str;
+      str = '<p><span style="color:' + this.getColor(message.username) + '">' + message.username + ': </span>' + message.body + '</p>';
+      this.$("#messages").append(str);
+      return this.$("#messages").scrollTop(1234567890);
     },
     addMessage: function(e) {
       var message,
@@ -181,7 +188,6 @@
       this.$el.hide();
       this.$el.children().empty();
       this.undelegateEvents();
-      this.model.off("change:messages");
       return this;
     }
   });
@@ -197,9 +203,24 @@
       this.updateGroupList();
       router.on('highlight', this.highlightSidebar, this);
       groups.on("add remove", this.updateGroupList, this);
-      return socket.on("online", function(people) {
+      socket.on("online", function(people) {
         console.log(people);
         return _this.updatePersonList(people);
+      });
+      return socket.on("message", function(data) {
+        var group;
+        group = groups.get(data.group);
+        group.get('messages').push(data.message);
+        if (router.current_view.model.id === group.id) {
+          console.log("We're currently viewing this group");
+          return router.current_view.pushMessage(data.message);
+        } else {
+          console.log("Not currently viewing");
+          group.set({
+            unread: group.get('unread') + 1
+          });
+          return _this.updateGroupList();
+        }
       });
     },
     routeInternal: function(e) {
@@ -215,9 +236,10 @@
       }
     },
     updateGroupList: function() {
-      return this.$("#groups").html(Handlebars.templates.sidebar_groups({
+      this.$("#groups").html(Handlebars.templates.sidebar_groups({
         groups: groups.toJSON()
       }));
+      return this.highlightSidebar();
     },
     updatePersonList: function(people) {
       return this.$("#people").html(Handlebars.templates.sidebar_people({

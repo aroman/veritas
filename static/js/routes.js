@@ -7,7 +7,6 @@
       "find/:kind": "find",
       "groups/:id": "group"
     },
-    initialize: function() {},
     find: function(kind) {
       $('#welcome').hide();
       if (!_.isNull(this.current_view)) {

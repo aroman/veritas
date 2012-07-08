@@ -5,11 +5,9 @@
     idAttribute: "_id",
     urlRoot: "group",
     initialize: function() {
-      var _this = this;
       this.ioBind('update', this.set);
-      return socket.on("group/" + this.id + ":message", function(message) {
-        _this.get('messages').push(message);
-        return _this.trigger("newmessage");
+      return this.set({
+        unread: 0
       });
     }
   });
