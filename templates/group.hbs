@@ -1,0 +1,9 @@
+<h2 class="centex">#{{name}}</h2>
+<br>
+<div id="messages">
+    {{#each messages}}
+      <p><span style="color:{{color}}">{{username}}: </span>{{body}}</p>
+    {{/each}}
+</div>
+<br>
+<input type="text" id="chat-input", autofocus="on", placeholder="Write something...">
