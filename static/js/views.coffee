@@ -1,5 +1,52 @@
-window.FinderView = Backbone.View.extend
-  el: "#finder"
+window.FindPeopleView = Backbone.View.extend
+  el: "#find-people"
+
+  events:
+    "keyup #thebox": "search"
+    "click .create-group": "createGroup"
+
+  initialize: () ->
+    @render()
+
+  render: () ->
+    @$el.show()
+    @$el.html Handlebars.templates.finder()
+
+  showGroups: (models) ->
+    @$("#results").html Handlebars.templates.foobar(groups: models)
+
+  createGroup: (e) ->
+    name = $(e.target).data("name")
+    group = new Group name: name
+
+    success_cb = () ->
+      groups.add group
+      router.navigate "/groups/#{group.id}", true
+
+    error_cb = () ->
+      alert "OH SHIT SOMETHING BROKE"
+
+    group.save {}, {success: success_cb, error: error_cb}
+
+  search: (e) ->
+    fragment = @$("#thebox").val()
+    if fragment
+      matches = groups.filter (group) ->
+        ~group.get('name').indexOf fragment
+      if matches.length > 0
+        @showGroups matches
+      else
+        @$("#results").html Handlebars.templates.no_groups(name: fragment)
+    else
+      @$("#results").html "Start typing <3"
+
+  remove: () ->
+   @$el.hide()
+   @$el.children().remove()
+   return @
+
+window.FindGroupsView = Backbone.View.extend
+  el: "#find-groups"
 
   events:
     "keyup #thebox": "search"
@@ -47,6 +94,28 @@ window.FinderView = Backbone.View.extend
 
 window.GroupView = Backbone.View.extend
   el: "#group"
+  color_bank: [
+    "#C91371",
+    "#6477CA",
+    "#869A80",
+    "#F79B06",
+    "#CE9F9F",
+    "#1EA3D2",
+    "#A2C085",
+    "#87BB06",
+    "#BD1FFC",
+    "#3FCECB",
+    "#F8D19E",
+    "#48EE59",
+    "#A8E947",
+    "#11A0E1",
+    "#DAD2AD",
+    "#FAC528",
+    "#D92A53",
+    "#EED516",
+    "#F3322A",
+    "#579C94"
+  ]
   colors: {}
 
   events:
@@ -62,15 +131,16 @@ window.GroupView = Backbone.View.extend
     @$('.inner').html Handlebars.templates.group @colorize(@model.toJSON())
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
+    @$("#chat-input").focus()
 
   colorize: (group) ->
     colorized = []
     _.each group.messages, (message) =>
-      # color already generated
+      # color already assigned
       if _.has @colors, message.username
         message.color = @colors[message.username]
       else
-        @colors[message.username] = "#"+((1<<24)*Math.random()|0).toString(16)
+        @colors[message.username] = @color_bank[Math.floor(Math.random() * @color_bank.length)]
         message.color = @colors[message.username]
       colorized.push message
     group.messages = colorized
@@ -106,6 +176,7 @@ window.AppView = Backbone.View.extend
     router.on 'highlight', this.highlightSidebar, this
     groups.on "add remove", @updateGroupList, this
     socket.on "online", (people) =>
+      console.log people
       @updatePersonList people
 
   routeInternal: (e) ->

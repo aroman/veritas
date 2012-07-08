@@ -2,8 +2,69 @@
 (function() {
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  window.FinderView = Backbone.View.extend({
-    el: "#finder",
+  window.FindPeopleView = Backbone.View.extend({
+    el: "#find-people",
+    events: {
+      "keyup #thebox": "search",
+      "click .create-group": "createGroup"
+    },
+    initialize: function() {
+      return this.render();
+    },
+    render: function() {
+      this.$el.show();
+      return this.$el.html(Handlebars.templates.finder());
+    },
+    showGroups: function(models) {
+      return this.$("#results").html(Handlebars.templates.foobar({
+        groups: models
+      }));
+    },
+    createGroup: function(e) {
+      var error_cb, group, name, success_cb;
+      name = $(e.target).data("name");
+      group = new Group({
+        name: name
+      });
+      success_cb = function() {
+        groups.add(group);
+        return router.navigate("/groups/" + group.id, true);
+      };
+      error_cb = function() {
+        return alert("OH SHIT SOMETHING BROKE");
+      };
+      return group.save({}, {
+        success: success_cb,
+        error: error_cb
+      });
+    },
+    search: function(e) {
+      var fragment, matches;
+      fragment = this.$("#thebox").val();
+      if (fragment) {
+        matches = groups.filter(function(group) {
+          return ~group.get('name').indexOf(fragment);
+        });
+        if (matches.length > 0) {
+          return this.showGroups(matches);
+        } else {
+          return this.$("#results").html(Handlebars.templates.no_groups({
+            name: fragment
+          }));
+        }
+      } else {
+        return this.$("#results").html("Start typing <3");
+      }
+    },
+    remove: function() {
+      this.$el.hide();
+      this.$el.children().remove();
+      return this;
+    }
+  });
+
+  window.FindGroupsView = Backbone.View.extend({
+    el: "#find-groups",
     events: {
       "keyup #thebox": "search",
       "click .create-group": "createGroup"
@@ -65,6 +126,7 @@
 
   window.GroupView = Backbone.View.extend({
     el: "#group",
+    color_bank: ["#C91371", "#6477CA", "#869A80", "#F79B06", "#CE9F9F", "#1EA3D2", "#A2C085", "#87BB06", "#BD1FFC", "#3FCECB", "#F8D19E", "#48EE59", "#A8E947", "#11A0E1", "#DAD2AD", "#FAC528", "#D92A53", "#EED516", "#F3322A", "#579C94"],
     colors: {},
     events: {
       "keyup #chat-input": "addMessage"
@@ -79,7 +141,8 @@
     render: function() {
       this.$el.show();
       this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
-      return this.$("#messages").scrollTop(1234567890);
+      this.$("#messages").scrollTop(1234567890);
+      return this.$("#chat-input").focus();
     },
     colorize: function(group) {
       var colorized,
@@ -89,7 +152,7 @@
         if (_.has(_this.colors, message.username)) {
           message.color = _this.colors[message.username];
         } else {
-          _this.colors[message.username] = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+          _this.colors[message.username] = _this.color_bank[Math.floor(Math.random() * _this.color_bank.length)];
           message.color = _this.colors[message.username];
         }
         return colorized.push(message);
@@ -135,6 +198,7 @@
       router.on('highlight', this.highlightSidebar, this);
       groups.on("add remove", this.updateGroupList, this);
       return socket.on("online", function(people) {
+        console.log(people);
         return _this.updatePersonList(people);
       });
     },

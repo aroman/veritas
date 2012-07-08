@@ -32,7 +32,7 @@ body, input, select {
 .successkid {
   width: 300px;
   border-radius: 10px;
-  box-shadow: 0 0 15px #137c18;
+  box-shadow: 0 0 20px black;
   margin-bottom: 50px;
 }
 
@@ -66,7 +66,6 @@ b {
 
 .btn-sidebar {
   margin-bottom: 10px;
-
 }
 
 /* Fix overridden styles */
@@ -76,6 +75,10 @@ b {
 
 .btn-sidebar.btn-info:hover {
   background-color: #2F96B4;
+}
+
+.btn-sidebar.btn-success:hover {
+  background-color: #51A351;
 }
 
 #chat-input {
@@ -148,6 +151,7 @@ h3 small {
   padding-top: 10px;
   padding-bottom: 50px;
   margin-bottom: 25px;
+  word-wrap: break-word;
 }
 /*
 .groups-span {

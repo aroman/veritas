@@ -3,19 +3,22 @@ window.Router = Backbone.Router.extend
   current_view: null
 
   routes:
-    "":               "find"
-    "find":           "find"
+    "find/:kind":     "find"
     "groups/:id":     "group"
 
   initialize: () ->
     # @find()
 
-  find: () ->
+  find: (kind) ->
     $('#welcome').hide()
+
     unless _.isNull @current_view
       @current_view.remove()
 
-    @current_view = new FinderView()    
+    if kind is "groups"
+      @current_view = new FindPeopleView()    
+    else
+      @current_view = new FindGroupsView()
 
   group: (id) ->
     $('#welcome').hide()
