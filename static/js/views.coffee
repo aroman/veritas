@@ -59,7 +59,7 @@ window.GroupView = Backbone.View.extend
 
   render: () ->
     @$el.show()
-    @$el.html Handlebars.templates.group @colorize(@model.toJSON())
+    @$('.inner').html Handlebars.templates.group @colorize(@model.toJSON())
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
 
@@ -79,6 +79,7 @@ window.GroupView = Backbone.View.extend
   addMessage: (e) ->
     if e.keyCode is 13
       message = @$(e.target).val()
+      @$(e.target).val('')
       if message
         socket.emit "group:message", @model.id, message, (err, res) =>
           if err

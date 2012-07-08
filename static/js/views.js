@@ -78,7 +78,7 @@
     },
     render: function() {
       this.$el.show();
-      this.$el.html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
+      this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
       return this.$("#messages").scrollTop(1234567890);
     },
     colorize: function(group) {
@@ -102,6 +102,7 @@
         _this = this;
       if (e.keyCode === 13) {
         message = this.$(e.target).val();
+        this.$(e.target).val('');
         if (message) {
           return socket.emit("group:message", this.model.id, message, function(err, res) {
             if (err) {
