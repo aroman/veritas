@@ -29,6 +29,13 @@ body, input, select {
   white-space: nowrap;
 }
 
+.successkid {
+  width: 300px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #137c18;
+  margin-bottom: 50px;
+}
+
 #thebox {
   height: 40px;
   width: 300px;

@@ -116,7 +116,7 @@
     },
     remove: function() {
       this.$el.hide();
-      this.$el.children().remove();
+      this.$el.children().empty();
       this.undelegateEvents();
       this.model.off("change:messages");
       return this;

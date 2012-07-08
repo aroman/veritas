@@ -11,12 +11,14 @@ window.Router = Backbone.Router.extend
     # @find()
 
   find: () ->
+    $('#welcome').hide()
     unless _.isNull @current_view
       @current_view.remove()
 
     @current_view = new FinderView()    
 
   group: (id) ->
+    $('#welcome').hide()
     group = groups.get id
 
     if not group

@@ -10,6 +10,7 @@
     },
     initialize: function() {},
     find: function() {
+      $('#welcome').hide();
       if (!_.isNull(this.current_view)) {
         this.current_view.remove();
       }
@@ -17,6 +18,7 @@
     },
     group: function(id) {
       var group;
+      $('#welcome').hide();
       group = groups.get(id);
       if (!group) {
         alert("YOU EEEEDIOT! That group doesn't exist!!1one!");

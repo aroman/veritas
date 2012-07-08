@@ -229,7 +229,8 @@ curses = [
   "dick",
   "penis",
   "vagina",
-  "pussy"
+  "pussy",
+  "tits"
 ]
 
 cleans = [

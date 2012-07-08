@@ -89,7 +89,7 @@ window.GroupView = Backbone.View.extend
 
   remove: () ->
     @$el.hide()
-    @$el.children().remove()
+    @$el.children().empty()
     @undelegateEvents() 
     @model.off "change:messages"
     return @
