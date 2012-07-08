@@ -182,21 +182,18 @@ app.post "/username", (req, res) ->
       else
         res.send "OK"
 
+app.get "/people/:id", ensureSession, (req, res) ->
+  res.render "person"
+    appmode: true
+
 app.get "/lounge*", ensureSession, (req, res) ->
   username = req.session.username
   async.parallel [
-    (cb) ->
-      models.Person
-        .findOne()
-        .where("username", username)
-        .run cb
     (cb) ->
       models.Group
         .find()
         .populate("members", ["username"])
         .run cb
-    (cb) ->
-      models.Person.find {}, cb
   ],
   (err, results) ->
     if err
@@ -210,8 +207,7 @@ app.get "/lounge*", ensureSession, (req, res) ->
         _online[username] = 1
       res.render "lounge"
         appmode: true
-        me: results[0]
-        groups_bootstrap: JSON.stringify results[1]
+        groups_bootstrap: JSON.stringify results[0]
         online: JSON.stringify _.keys(_online)
 
 curses = [
@@ -326,12 +322,10 @@ io.sockets.on "connection", (socket) ->
           wf_callback err, group
     ],
     (err, group) ->
-      console.log group + " saved!"
       socket.broadcast.emit "groups:add", group
       cb err, group
 
   socket.on "group:message", (group_id, body, cb) ->
-    console.log "group:message received!"
     async.waterfall [
       (wf_callback) ->
         models.Group
@@ -347,9 +341,7 @@ io.sockets.on "connection", (socket) ->
           wf_callback err, group, message
     ],
     (err, group, message) ->
-      console.log "Message saved!"
-      event_name = "group/#{group._id}:message"
-      io.sockets.emit event_name, message
+      io.sockets.emit "group/#{group._id}:message", message
       cb err
 
   socket.on "disconnect", () ->

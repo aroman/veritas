@@ -89,6 +89,7 @@
     go.prop 'disabled', false
 
   hid.blur (e) ->
+    enableIfKosher()
     if not hid.val()
       bitch e.target, "Harvard ID can't be blank"
     else
@@ -100,6 +101,7 @@
       chill e.target
 
   username.blur (e) ->
+    enableIfKosher()
     if not username.val()
       bitch e.target, "username can't be blank"
     else if " " in username.val()
@@ -116,6 +118,7 @@
             bitch e.target, "username already taken"
 
   pw1.blur (e) ->
+    enableIfKosher()
     if not pw1.val()
       bitch e.target, "password can't be blank"
     else
@@ -125,12 +128,14 @@
         chill e.target
 
   pw2.blur (e) ->
+    enableIfKosher()
     if pw1.val() isnt pw2.val()
       bitch e.target, "password didn't match"
     else
       chill e.target
 
   notevil.click (e) ->
+    enableIfKosher()
     if notevil.is ":checked"
       chill e.target
     else
