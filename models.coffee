@@ -53,6 +53,9 @@ M.PersonSchema = new mongoose.Schema
     type: String
     required: true
     enum: M.DORMS
+  ovaries:
+    type: Boolean
+    required: true
 
   groups:
     [

@@ -48,6 +48,7 @@ app.configure ->
   app.set 'jsonp callback'
   app.set 'view engine', 'jade'
   app.set 'views', "#{__dirname}/views"
+  app.use express.limit('1mb')
 
 app.dynamicHelpers
   version: (req, res) ->
@@ -84,6 +85,7 @@ app.get "/up", (req, res) ->
       dorms: models.DORMS
       dorm: ''
       notevil: ''
+      ovaries: ''
       username: ''
       hid: ''
 
@@ -92,6 +94,7 @@ app.post "/up", (req, res) ->
   username = req.body.username
   password1 = req.body.password1
   password2 = req.body.password2
+  ovaries = req.body.ovaries
   dorm = req.body.dorm
   notevil = req.body.notevil
 
@@ -103,6 +106,7 @@ app.post "/up", (req, res) ->
       hid: hid
       dorm: dorm
       notevil: notevil
+      ovaries: ovaries
       username: username
 
   if password1 isnt password2
@@ -123,6 +127,10 @@ app.post "/up", (req, res) ->
     person = new models.Person()
     person.hid = Number(hid)
     person.username = username
+    if ovaries
+      person.ovaries = true
+    else
+      person.ovaries = false
     person.password = password1
     person.dorm = dorm
     person.save (err) ->
@@ -183,6 +191,25 @@ app.post "/username", (req, res) ->
         res.send "OK"
 
 app.get "/people/:id", ensureSession, (req, res) ->
+  if req.params.id is "me"
+    id = req.session.username
+  else
+    id = req.params.id
+  models.Person
+    .findOne()
+    .where("username", id)
+    .populate("groups")
+    .run (err, person) ->
+      if err or not person
+        res.render "error"
+          appmode: false
+      else
+        res.render "person"
+          appmode: true
+          person: person
+
+
+app.post "/people/:id", ensureSession, (req, res) ->
   res.render "person"
     appmode: true
 

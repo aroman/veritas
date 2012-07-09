@@ -1,3 +1,9 @@
 .container
   .hero-unit
-    h1 Heyo, this is a mothafuckin' profile.
+    h1 Meet #{person.username}.
+    h2 He calls #{person.dorm} his home.
+    br
+    h3 He's hangs out in these groups:
+    br
+    each group in person.groups
+        p #{group.name}

@@ -1,4 +1,4 @@
-.content
+.container
   .hero-unit
     form#supform.form-horizontal(action="", method="POST")
       legend Sign up
@@ -37,6 +37,17 @@
               else
                 option #{_dorm}
           span.help-block
+      .control-group
+        .control-label do you have ovaries?
+        .controls
+          if ovaries
+            input(type="checkbox", name="ovaries", checked)
+          else 
+            input(type="checkbox", name="ovaries")
+          span.help-block
+          br
+          i
+            small you should probably check this if you're a girl
       .control-group
         .control-label i promise to only use my powers for good
         .controls
