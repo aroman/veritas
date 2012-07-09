@@ -20,6 +20,13 @@ package_info = JSON.parse(fs.readFileSync "#{__dirname}/package.json", "utf-8")
 app = express.createServer()
 io = socketio.listen app
 
+io.set 'transports', [
+  'flashsocket',
+  'htmlfile',
+  'xhr-polling',
+  'jsonp-polling'
+]
+
 sessionStore = new MongoStore
   db: 'keeba'
   url: secrets.MONGO_URI
