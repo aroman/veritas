@@ -35,7 +35,7 @@
 
   io = socketio.listen(app);
 
-  io.set('transports', ['flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']);
+  io.set('transports', ['htmlfile', 'xhr-polling', 'jsonp-polling']);
 
   sessionStore = new MongoStore({
     db: 'keeba',

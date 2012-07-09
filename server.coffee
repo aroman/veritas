@@ -21,7 +21,6 @@ app = express.createServer()
 io = socketio.listen app
 
 io.set 'transports', [
-  'flashsocket',
   'htmlfile',
   'xhr-polling',
   'jsonp-polling'
