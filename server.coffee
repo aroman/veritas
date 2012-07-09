@@ -33,7 +33,7 @@ sessionStore = new MongoStore
   stringify: false
   clear_interval: 432000, # 5 days
   () ->
-    app.listen process.env.PORT || 7331
+    app.listen process.env.PORT or 7331
     console.log "   ---------".red
     console.log "   | VE RI |".red
     console.log "    \\ TAS /".red
