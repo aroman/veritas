@@ -65,6 +65,18 @@ M.PersonSchema = new mongoose.Schema
 
   nickname: String
 
+M.PersonSchema
+  .virtual("ovaries.poss")
+  .get () ->
+    if @ovaries "his"
+    else "her"
+
+M.PersonSchema
+  .virtual("ovaries.pron")
+  .get () ->
+    if @ovaries "he"
+    else "she"
+
 M.Person = mongoose.model 'person', M.PersonSchema
 
 M.MessageSchema = new mongoose.Schema

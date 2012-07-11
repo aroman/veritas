@@ -35,8 +35,6 @@
 
   io = socketio.listen(app);
 
-  io.set('transports', ['htmlfile', 'xhr-polling', 'jsonp-polling']);
-
   sessionStore = new MongoStore({
     db: 'keeba',
     url: secrets.MONGO_URI,
@@ -176,9 +174,11 @@
       person.dorm = dorm;
       return person.save(function(err) {
         if (err) {
+          console.log(err);
           return fail();
         } else {
-          return res.redirect("/");
+          req.session.username = username;
+          return res.redirect("/lounge");
         }
       });
     }
@@ -298,7 +298,7 @@
 
   curses = ["fuck", "shit", "bitch", "douche", "cock", "fag", "faggot", "nigger", "cunt", "whore", "ass", "dick", "penis", "vagina", "pussy", "tits"];
 
-  cleans = ["squidward", "jigglypuff", "trollface", "cowsaysmoo", "soap", "AGNRY FAIC", "Sarah Palin", "N00t G1ngr1ch", "l.o.l", "$#&!*#$*@&!&$", "pikachu", "creampuffs", "mushrooms", "Kleenex", "POLAR BEARS", "OVER 9000", "supersain", "deep", "BUT SIRRR", "DEEEEEEEEEEEEEEP", "GREAT SUCCESS", "chair", "ductape", "agua", "חביטאח", "watermellon", "Wal-Mart", "EXCEELLLENT", "thorax", "timmy", "James"];
+  cleans = ["squidward", "jigglypuff", "trollface", "cowsaysmoo", "soap", "AGNRY FAIC", "Sarah Palin", "N00t G1ngr1ch", "l.o.l", "$#&!*#$*@&!&$", "pikachu", "creampuffs", "mushrooms", "Kleenex", "POLAR BEARS", "OVER 9000", "supersain", "deep", "BUT SIRRR", "DEEEEEEEEEEEEEEP", "GREAT SUCCESS", "chair", "ductape", "agua", "חביטאח", "watermellon", "Wal-Mart", "EXCEELLLENT", "thorax", "timmy", "James", "bob saget"];
 
   cussFilter = function(text) {
     var curse, pattern, _i, _len;

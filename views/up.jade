@@ -62,7 +62,7 @@
               | veritas is built on honesty and respect.
               | please don't be "that guy" (or girl).
       br
-      input#go.btn.btn-success.pull-right(type="submit", value="Goooooooo!", disabled)
+      input#go.btn.btn-success.pull-right(type="submit", value="Goooooooo!")
 
 :coffeescript
   supform = $("#supform")
@@ -73,86 +73,71 @@
   go = $("#go")
   notevil = $("#notevil")
 
+
   bitch = (e, message) ->
     $e = $(e)
     $e.parent().parent().addClass "error"
     $e.siblings(".help-block").text message
-    go.prop('disabled', true)
+    return false
 
   chill = (e) ->
     $e = $(e)
     $e.parent().parent().removeClass "error"
     $e.siblings(".help-block").text ''
-    enableIfKosher()
+    return true
 
-  enableIfKosher = () ->
-    len = username.val().length 
-    return unless pw1.val().length > 5
-    return unless pw1.val() is pw2.val()
-    return unless len > 5 and len < 18
-    return unless " " not in username.val()
-    return unless hid.val()
-    return unless notevil.is ":checked"
-    $.post "/validate", hid: hid.val(), (data) ->
-      return unless data is "OK"
-    $.post "/username", username: username.val(), (data) ->
-      return unless data is "OK"
-    go.prop 'disabled', false
-
-  hid.blur (e) ->
-    enableIfKosher()
-    if not hid.val()
-      bitch e.target, "Harvard ID can't be blank"
-    else
-      $.post "/validate", hid: hid.val(), (data) ->
-        if data is "OK"
-          chill e.target
-        else
-          bitch e.target, "invalid Harvard ID"
-      chill e.target
-
-  username.blur (e) ->
-    enableIfKosher()
+  validate = () ->
+    # username
     if not username.val()
-      bitch e.target, "username can't be blank"
+      return bitch username, "username can't be blank"
     else if " " in username.val()
-      bitch e.target, "username can't contain spaces"
+      return bitch username, "username can't contain spaces"
     else
       len = username.val().length 
       if len < 5 or len > 18
-        bitch e.target, "username must be between 5 and 18 characters"
+        return bitch username, "username must be between 5 and 18 characters"
       else
         $.post "/username", username: username.val(), (data) ->
           if data is "OK"
-            chill e.target
+            chill username
           else
-            bitch e.target, "username already taken"
+            return bitch username, "username already taken"
 
-  pw1.blur (e) ->
-    enableIfKosher()
+    # HID
+    if not hid.val()
+      return bitch hid, "Harvard ID can't be blank"
+    else
+      $.post "/validate", hid: hid.val(), (data) ->
+        if data is "OK"
+          chill hid
+        else
+          return bitch hid, "invalid Harvard ID"
+      chill hid
+
+    # PW1
     if not pw1.val()
-      bitch e.target, "password can't be blank"
+        return bitch pw1, "password can't be blank"
     else
       if pw1.val().length <= 5
-        bitch e.target, "password must be > 5 characters"
+        return bitch pw1, "password must be > 5 characters"
       else
-        chill e.target
+        chill pw1
 
-  pw2.blur (e) ->
-    enableIfKosher()
+    # PW2
     if pw1.val() isnt pw2.val()
-      bitch e.target, "password didn't match"
+      return bitch pw2, "password didn't match"
     else
-      chill e.target
+      chill pw2
 
-  notevil.click (e) ->
-    enableIfKosher()
+    #notevil
     if notevil.is ":checked"
-      chill e.target
+      chill notevil
     else
-      bitch e.target, "come on dude, seriously?"
+      return bitch notevil, "come on dude, seriously?"
+
+  $("input").focusout () ->
+    validate()
 
   go.click (e) ->
-    go.val "Going..."
-    go.prop 'disabled', true
-    supform.submit()
+    unless validate()
+      return false

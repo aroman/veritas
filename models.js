@@ -68,6 +68,22 @@
     nickname: String
   });
 
+  M.PersonSchema.virtual("ovaries.poss").get(function() {
+    if (this.ovaries("his")) {
+
+    } else {
+      return "her";
+    }
+  });
+
+  M.PersonSchema.virtual("ovaries.pron").get(function() {
+    if (this.ovaries("he")) {
+
+    } else {
+      return "she";
+    }
+  });
+
   M.Person = mongoose.model('person', M.PersonSchema);
 
   M.MessageSchema = new mongoose.Schema({

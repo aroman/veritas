@@ -20,12 +20,6 @@ package_info = JSON.parse(fs.readFileSync "#{__dirname}/package.json", "utf-8")
 app = express.createServer()
 io = socketio.listen app
 
-io.set 'transports', [
-  'htmlfile',
-  'xhr-polling',
-  'jsonp-polling'
-]
-
 sessionStore = new MongoStore
   db: 'keeba'
   url: secrets.MONGO_URI
@@ -141,15 +135,18 @@ app.post "/up", (req, res) ->
     person.dorm = dorm
     person.save (err) ->
       if err
+        console.log err
         fail()
       else
-        res.redirect "/"
+        # Log them in.
+        req.session.username = username
+        res.redirect "/lounge"
 
 app.get "/in", (req, res) ->
   res.render "in"
-    appmode: false
-    failed: false
-    username: ''
+      appmode: false
+      failed: false
+      username: ''
 
 app.post "/in", (req, res) ->
   username = req.body.username or ''
@@ -213,7 +210,6 @@ app.get "/people/:id", ensureSession, (req, res) ->
         res.render "person"
           appmode: true
           person: person
-
 
 app.post "/people/:id", ensureSession, (req, res) ->
   res.render "person"
@@ -293,7 +289,8 @@ cleans = [
   "EXCEELLLENT",
   "thorax",
   "timmy",
-  "James"
+  "James",
+  "bob saget"
 ]
 
 cussFilter = (text) ->

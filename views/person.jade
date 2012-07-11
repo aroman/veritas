@@ -1,9 +1,10 @@
 .container
   .hero-unit
+    #{person}
     h1 Meet #{person.username}.
-    h2 He calls #{person.dorm} his home.
+    h2 #{person.ovaries.pron} calls #{person.dorm} #{person.ovaries.pron} home.
     br
-    h3 He's hangs out in these groups:
+    h3 #{person.ovaries.pron} hangs out in these groups:
     br
     each group in person.groups
         p #{group.name}
