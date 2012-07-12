@@ -1,7 +1,8 @@
-<h2 class="centex">#{{name}}</h2>
+<span>Try to stick to talking about...</span>
+<h2 class="centex">{{name}}</h2>
 <br>
 <div id="messages">
     {{#each messages}}
-      <p><span style="color:{{color}}">{{username}}: </span>{{body}}</p>
+      <p><a href="/people/{{username}}" style="color:{{color}}"> {{username}}</a>: {{body}}</p>
     {{/each}}
 </div>

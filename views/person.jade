@@ -1,10 +1,19 @@
 .container
   .hero-unit
-    #{person}
     h1 Meet #{person.username}.
-    h2 #{person.ovaries.pron} calls #{person.dorm} #{person.ovaries.pron} home.
+    if person.ovaries
+      h2 She calls #{person.dorm} her #{person.ovaries.pron} home.
+    else 
+      h2 He calls #{person.dorm} his #{person.ovaries.pron} home.
     br
-    h3 #{person.ovaries.pron} hangs out in these groups:
-    br
-    each group in person.groups
-        p #{group.name}
+    if person.groups.length > 0
+      if person.ovaries
+        h3 She hangs out in these groups:
+      else 
+        h3 He hangs out in these groups:
+      ul
+        each group in person.groups
+          li
+            a.find-link(style="color:white;font-size:17px", href="/lounge/groups/#{group.id}", data-route) #{group.name}
+    else
+      h3 He hasn't joined any groups yet!

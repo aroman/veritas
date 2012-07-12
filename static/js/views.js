@@ -13,7 +13,7 @@
     },
     render: function() {
       this.$el.show();
-      return this.$el.html(Handlebars.templates.finder());
+      return this.$el.html(Handlebars.templates.find_people());
     },
     showGroups: function(models) {
       return this.$("#results").html(Handlebars.templates.foobar({
@@ -53,7 +53,7 @@
           }));
         }
       } else {
-        return this.$("#results").html("Start typing <3");
+        return this.render();
       }
     },
     remove: function() {
@@ -92,7 +92,7 @@
         return router.navigate("/groups/" + group.id, true);
       };
       error_cb = function() {
-        return alert("OH SHIT SOMETHING BROKE");
+        return alert("OH SNAP. SOMETHING BROKE.");
       };
       return group.save({}, {
         success: success_cb,
@@ -176,7 +176,7 @@
         if (message) {
           return socket.emit("group:message", this.model.id, message, function(err, res) {
             if (err) {
-              return alert("FUCK FUCK SOMETHING BROKE OH SHIT");
+              return alert("Oh snap. Something broke. You should yell at Avi.");
             } else {
               return _this.render;
             }
@@ -211,7 +211,7 @@
         var group;
         group = groups.get(data.group);
         group.get('messages').push(data.message);
-        if (router.current_view.model.id === group.id) {
+        if (router.current_view && router.current_view.model.id === group.id) {
           console.log("We're currently viewing this group");
           return router.current_view.pushMessage(data.message);
         } else {

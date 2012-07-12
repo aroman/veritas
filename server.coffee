@@ -358,15 +358,26 @@ io.sockets.on "connection", (socket) ->
   socket.on "group:message", (group_id, body, cb) ->
     async.waterfall [
       (wf_callback) ->
+        models.Person
+          .findOne()
+          .where("username", username)
+          .run wf_callback
+      (account, wf_callback) ->
         models.Group
           .findOne()
           .where("_id", group_id)
-          .run wf_callback
-      (group, wf_callback) ->
+          .run (err, group) ->
+            wf_callback err, account, group
+      (account, group, wf_callback) ->
+        account.groups.push group
+        account.save (err, account) ->
+          wf_callback err, account, group
+      (account, group, wf_callback) ->
         message =
           username: username
           body: cussFilter body
         group.messages.push message
+        group.members.push account
         group.save (err) ->
           wf_callback err, group, message
     ],

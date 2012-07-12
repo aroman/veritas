@@ -48,6 +48,10 @@ body, input, select {
   padding-bottom: 50px;
 }
 
+#results > span{
+  word-wrap: break-word;
+}
+
 #group {
   position: relative;
 }
@@ -63,6 +67,10 @@ body, input, select {
 
 b {
   color: red;
+}
+
+a.find-link {
+  font-size: 20px;
 }
 
 .btn-sidebar {

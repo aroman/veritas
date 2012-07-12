@@ -10,7 +10,7 @@ window.FindPeopleView = Backbone.View.extend
 
   render: () ->
     @$el.show()
-    @$el.html Handlebars.templates.finder()
+    @$el.html Handlebars.templates.find_people()
 
   showGroups: (models) ->
     @$("#results").html Handlebars.templates.foobar(groups: models)
@@ -38,7 +38,7 @@ window.FindPeopleView = Backbone.View.extend
       else
         @$("#results").html Handlebars.templates.no_groups(name: fragment)
     else
-      @$("#results").html "Start typing <3"
+      @render()
 
   remove: () ->
    @$el.hide()
@@ -71,7 +71,7 @@ window.FindGroupsView = Backbone.View.extend
       router.navigate "/groups/#{group.id}", true
 
     error_cb = () ->
-      alert "OH SHIT SOMETHING BROKE"
+      alert "OH SNAP. SOMETHING BROKE."
 
     group.save {}, {success: success_cb, error: error_cb}
 
@@ -158,7 +158,7 @@ window.GroupView = Backbone.View.extend
       if message
         socket.emit "group:message", @model.id, message, (err, res) =>
           if err
-            alert "FUCK FUCK SOMETHING BROKE OH SHIT"
+            alert "Oh snap. Something broke. You should yell at Avi."
           else
             @render
 
@@ -185,7 +185,7 @@ window.AppView = Backbone.View.extend
     socket.on "message", (data) =>
       group = groups.get data.group
       group.get('messages').push data.message
-      if router.current_view.model.id is group.id
+      if router.current_view and router.current_view.model.id is group.id
         console.log "We're currently viewing this group"
         router.current_view.pushMessage data.message
       else

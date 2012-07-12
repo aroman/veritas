@@ -369,14 +369,24 @@
     socket.on("group:message", function(group_id, body, cb) {
       return async.waterfall([
         function(wf_callback) {
-          return models.Group.findOne().where("_id", group_id).run(wf_callback);
-        }, function(group, wf_callback) {
+          return models.Person.findOne().where("username", username).run(wf_callback);
+        }, function(account, wf_callback) {
+          return models.Group.findOne().where("_id", group_id).run(function(err, group) {
+            return wf_callback(err, account, group);
+          });
+        }, function(account, group, wf_callback) {
+          account.groups.push(group);
+          return account.save(function(err, account) {
+            return wf_callback(err, account, group);
+          });
+        }, function(account, group, wf_callback) {
           var message;
           message = {
             username: username,
             body: cussFilter(body)
           };
           group.messages.push(message);
+          group.members.push(account);
           return group.save(function(err) {
             return wf_callback(err, group, message);
           });
