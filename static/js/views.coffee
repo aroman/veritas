@@ -1,5 +1,6 @@
 window.ChooseView = Backbone.View.extend
   el: "#choose"
+  #TODO: Determine whether this is still needed.
   selected: []
 
   events:
@@ -16,21 +17,43 @@ window.ChooseView = Backbone.View.extend
     @$el.html Handlebars.templates.finder(selected: @selected)
     @$("#thebox").focus()
 
-  go: () ->
-    socket.emit "join groups", @selected, (err) ->
-      alert "server ack"
+  go: (e) ->
+    $(e.target).button("loading")
+    @$(":input").prop('disabled', true)
+
+    ack = (err) =>
+      console.log "ack"
+      if err
+        $(e.target).button('reset')
+        @$(":input").prop('disabled', false)
+        console.log "fail"
+        @$("#error").show()
+      else
+        window.location.replace("#{location.origin}/lounge");
+
+
+    socket.emit "join groups", _.pluck(@selected, "_id"), ack
 
   joinGroup: (e) ->
+    id = $(e.target).data("id")
     @selected.push
-      id: $(e.target).data("id")
+      _id: id
       name: $(e.target).text()
+    for course, index in harvard_courses
+      if course._id is id
+        harvard_courses[index].selected = true
+        break
     @render()
 
   leaveGroup: (e) ->
     id = $(e.target).data("id")
     group = _.find @selected, (group) ->
-      group.id == id
+      group._id == id
     @selected.splice _.indexOf(@selected, group), 1
+    for course, index in harvard_courses
+      if course._id is id
+        delete harvard_courses[index].selected
+        break
     @render()
 
   showGroups: (models) ->
@@ -40,7 +63,7 @@ window.ChooseView = Backbone.View.extend
     fragment = @$("#thebox").val()
     if fragment.length
       matches = harvard_courses.filter (course) ->
-        ~course.name.indexOf fragment
+        course.name.toLowerCase().indexOf(fragment.toLowerCase()) isnt -1
       if matches.length > 0
         @showGroups matches
         @$("#thebox").parent().removeClass("error")

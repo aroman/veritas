@@ -1,5 +1,9 @@
 {{#each groups}}
-  <a class="join-group" href="#" data-id="{{_id}}">{{name}}</a>
+  {{#if selected}}
+      <span style="color: #41DF41">&#x2713; {{name}}</span>
+  {{else}}
+      <a class="join-group" href="#" data-id="{{_id}}">{{name}}</a>
+  {{/if}}
   <br>
   <br>
 {{/each}}

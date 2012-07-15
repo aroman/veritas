@@ -59,6 +59,12 @@ body, input, select, button {
   border-collapse: separate;
 }
 
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; 
+}
+
 td {
   vertical-align: middle !important;
   text-align: center;

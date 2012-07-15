@@ -21,25 +21,54 @@
       }));
       return this.$("#thebox").focus();
     },
-    go: function() {
-      return socket.emit("join groups", this.selected, function(err) {
-        return alert("server ack");
-      });
+    go: function(e) {
+      var ack,
+        _this = this;
+      $(e.target).button("loading");
+      this.$(":input").prop('disabled', true);
+      ack = function(err) {
+        console.log("ack");
+        if (err) {
+          $(e.target).button('reset');
+          _this.$(":input").prop('disabled', false);
+          console.log("fail");
+          return _this.$("#error").show();
+        } else {
+          return window.location.replace("" + location.origin + "/lounge");
+        }
+      };
+      return socket.emit("join groups", _.pluck(this.selected, "_id"), ack);
     },
     joinGroup: function(e) {
+      var course, id, index, _i, _len;
+      id = $(e.target).data("id");
       this.selected.push({
-        id: $(e.target).data("id"),
+        _id: id,
         name: $(e.target).text()
       });
+      for (index = _i = 0, _len = harvard_courses.length; _i < _len; index = ++_i) {
+        course = harvard_courses[index];
+        if (course._id === id) {
+          harvard_courses[index].selected = true;
+          break;
+        }
+      }
       return this.render();
     },
     leaveGroup: function(e) {
-      var group, id;
+      var course, group, id, index, _i, _len;
       id = $(e.target).data("id");
       group = _.find(this.selected, function(group) {
-        return group.id === id;
+        return group._id === id;
       });
       this.selected.splice(_.indexOf(this.selected, group), 1);
+      for (index = _i = 0, _len = harvard_courses.length; _i < _len; index = ++_i) {
+        course = harvard_courses[index];
+        if (course._id === id) {
+          delete harvard_courses[index].selected;
+          break;
+        }
+      }
       return this.render();
     },
     showGroups: function(models) {
@@ -52,7 +81,7 @@
       fragment = this.$("#thebox").val();
       if (fragment.length) {
         matches = harvard_courses.filter(function(course) {
-          return ~course.name.indexOf(fragment);
+          return course.name.toLowerCase().indexOf(fragment.toLowerCase()) !== -1;
         });
         if (matches.length > 0) {
           this.showGroups(matches);

@@ -1,3 +1,7 @@
+<div id="error" class="alert alert-error" style="display:none">
+  Uh oh, something went wrong. Try again or contact Avi.
+</div>
+
 <h2 style="font-size:40px">Almost done, I promise.</h2>
 
 <br>
@@ -31,5 +35,5 @@
     <br>
     <br>
   {{/if}}
-  <button id="go" class="btn btn-success btn-large" {{#unless selected}} disabled="on" {{/unless}}>Done adding classes; onward!</button>
+  <button id="go" class="btn btn-success btn-large" {{#unless selected}} disabled="on" data-loading-text="Working..." {{/unless}}>Done adding classes? Onward!</button>
 </div>

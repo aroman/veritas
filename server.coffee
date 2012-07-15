@@ -228,8 +228,8 @@ app.get "/choose", ensureSession, (req, res) ->
         courses: JSON.stringify courses
 
 app.get "/lounge*", ensureSession, (req, res) ->
-  return res.redirect "/choose"
   uid = req.session.uid
+
   async.parallel [
     (cb) ->
       models.Group
@@ -240,25 +240,24 @@ app.get "/lounge*", ensureSession, (req, res) ->
       models.Person
         .findOne()
         .where("_id", uid)
-        .select("first", "last")
+        .select("first", "last", "groups")
+        .populate("groups")
         .run cb
   ],
   (err, results) ->
     if err
       res.render "error"
     else
-      # Copy the online list and add ourselves
-      # to a local copy of it for bootstrap sake
-      # if needed. (Initial page req.)
       person = results[1]
+      unless person.groups.length
+        return res.redirect "/choose"
       courses = results[2]
       online[uid] =
         name: "#{person.first} #{person.last}"
         id: uid
-      console.log courses
       res.render "lounge"
         appmode: true
-        groups_bootstrap: JSON.stringify results[0]
+        groups_bootstrap: JSON.stringify person.groups
         online: JSON.stringify _.values(online)
         harvard_courses: JSON.stringify []
 
@@ -360,35 +359,37 @@ io.sockets.on "connection", (socket) ->
   # broadcast = (message, data) ->
   #   io.sockets.in(token.username).emit(message, data)
 
-  socket.on "group:create", (data, cb) ->
-    async.waterfall [
-      (wf_callback) ->
-        models.Person
-          .findOne()
-          .where("uid", uid)
-          .run wf_callback
-      (account, wf_callback) ->
-        group = new models.Group()
-        group.name = data.name
-        group.members.push account
-        group.save (err, group) ->
-          wf_callback err, account, group
-      (account, group, wf_callback) ->
-        account.groups.push group
-        account.save (err, account) ->
-          wf_callback err, group
-    ],
-    (err, group) ->
-      socket.broadcast.emit "groups:add", group
-      cb err, group
+  # socket.on "group:create", (data, cb) ->
+  #   async.waterfall [
+  #     (wf_callback) ->
+  #       models.Person
+  #         .findOne()
+  #         .where("uid", uid)
+  #         .run wf_callback
+  #     (account, wf_callback) ->
+  #       group = new models.Group()
+  #       group.name = data.name
+  #       group.members.push account
+  #       group.save (err, group) ->
+  #         wf_callback err, account, group
+  #     (account, group, wf_callback) ->
+  #       account.groups.push group
+  #       account.save (err, account) ->
+  #         wf_callback err, group
+  #   ],
+  #   (err, group) ->
+  #     socket.broadcast.emit "groups:add", group
+  #     cb err, group
 
   socket.on "group:message", (group_id, body, cb) ->
+    # MELIOR: Use one idempotent operation.
     async.waterfall [
       (wf_callback) ->
         models.Person
           .findOne()
-          .where("uid", uid)
-          .run wf_callback
+          .where("_id", uid)
+          .run (err, account) ->
+            wf_callback err, account
       (account, wf_callback) ->
         models.Group
           .findOne()
@@ -396,15 +397,10 @@ io.sockets.on "connection", (socket) ->
           .run (err, group) ->
             wf_callback err, account, group
       (account, group, wf_callback) ->
-        account.groups.push group
-        account.save (err, account) ->
-          wf_callback err, account, group
-      (account, group, wf_callback) ->
         message =
-          uid: uid
+          username: account.first
           body: cussFilter body
         group.messages.push message
-        group.members.push account
         group.save (err) ->
           wf_callback err, group, message
     ],
@@ -421,7 +417,7 @@ io.sockets.on "connection", (socket) ->
         (wf_callback) ->
           models.Person
             .findOne()
-            .where("uid", uid)
+            .where("_id", uid)
             .run wf_callback
 
         (account, wf_callback) ->
@@ -432,14 +428,13 @@ io.sockets.on "connection", (socket) ->
               wf_callback err, account, group
 
         (account, group, wf_callback) ->
-          account.groups.push group
+          account.groups.addToSet group
           account.save (err, account) ->
             wf_callback err, account, group
 
         (account, group, wf_callback) ->
-          group.members.push account
-          group.save (err) ->
-            wf_callback err, group, message
+          group.members.addToSet account
+          group.save wf_callback
       ], async_cb
 
     async.forEach groups, itr, done

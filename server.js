@@ -284,13 +284,12 @@
 
   app.get("/lounge*", ensureSession, function(req, res) {
     var uid;
-    return res.redirect("/choose");
     uid = req.session.uid;
     return async.parallel([
       function(cb) {
         return models.Group.find().populate("members", ["first", "last"]).run(cb);
       }, function(cb) {
-        return models.Person.findOne().where("_id", uid).select("first", "last").run(cb);
+        return models.Person.findOne().where("_id", uid).select("first", "last", "groups").populate("groups").run(cb);
       }
     ], function(err, results) {
       var courses, person;
@@ -298,15 +297,17 @@
         return res.render("error");
       } else {
         person = results[1];
+        if (!person.groups.length) {
+          return res.redirect("/choose");
+        }
         courses = results[2];
         online[uid] = {
           name: "" + person.first + " " + person.last,
           id: uid
         };
-        console.log(courses);
         return res.render("lounge", {
           appmode: true,
-          groups_bootstrap: JSON.stringify(results[0]),
+          groups_bootstrap: JSON.stringify(person.groups),
           online: JSON.stringify(_.values(online)),
           harvard_courses: JSON.stringify([])
         });
@@ -362,50 +363,23 @@
       event_name = "" + model + "/" + data._id + ":" + method;
       return io.sockets.emit(event_name, data);
     };
-    socket.on("group:create", function(data, cb) {
-      return async.waterfall([
-        function(wf_callback) {
-          return models.Person.findOne().where("uid", uid).run(wf_callback);
-        }, function(account, wf_callback) {
-          var group;
-          group = new models.Group();
-          group.name = data.name;
-          group.members.push(account);
-          return group.save(function(err, group) {
-            return wf_callback(err, account, group);
-          });
-        }, function(account, group, wf_callback) {
-          account.groups.push(group);
-          return account.save(function(err, account) {
-            return wf_callback(err, group);
-          });
-        }
-      ], function(err, group) {
-        socket.broadcast.emit("groups:add", group);
-        return cb(err, group);
-      });
-    });
     socket.on("group:message", function(group_id, body, cb) {
       return async.waterfall([
         function(wf_callback) {
-          return models.Person.findOne().where("uid", uid).run(wf_callback);
+          return models.Person.findOne().where("_id", uid).run(function(err, account) {
+            return wf_callback(err, account);
+          });
         }, function(account, wf_callback) {
           return models.Group.findOne().where("_id", group_id).run(function(err, group) {
             return wf_callback(err, account, group);
           });
         }, function(account, group, wf_callback) {
-          account.groups.push(group);
-          return account.save(function(err, account) {
-            return wf_callback(err, account, group);
-          });
-        }, function(account, group, wf_callback) {
           var message;
           message = {
-            uid: uid,
+            username: account.first,
             body: cussFilter(body)
           };
           group.messages.push(message);
-          group.members.push(account);
           return group.save(function(err) {
             return wf_callback(err, group, message);
           });
@@ -426,21 +400,19 @@
       itr = function(group_id, async_cb) {
         return async.waterfall([
           function(wf_callback) {
-            return models.Person.findOne().where("uid", uid).run(wf_callback);
+            return models.Person.findOne().where("_id", uid).run(wf_callback);
           }, function(account, wf_callback) {
             return models.Group.findOne().where("_id", group_id).run(function(err, group) {
               return wf_callback(err, account, group);
             });
           }, function(account, group, wf_callback) {
-            account.groups.push(group);
+            account.groups.addToSet(group);
             return account.save(function(err, account) {
               return wf_callback(err, account, group);
             });
           }, function(account, group, wf_callback) {
-            group.members.push(account);
-            return group.save(function(err) {
-              return wf_callback(err, group, message);
-            });
+            group.members.addToSet(account);
+            return group.save(wf_callback);
           }
         ], async_cb);
       };
