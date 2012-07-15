@@ -28,10 +28,19 @@
       required: true,
       unique: true
     },
-    username: {
+    first: {
+      type: String,
+      required: true
+    },
+    last: {
+      type: String,
+      required: true
+    },
+    email: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
+      sparse: true
     },
     password: {
       type: String,
@@ -68,22 +77,6 @@
     nickname: String
   });
 
-  M.PersonSchema.virtual("ovaries.poss").get(function() {
-    if (this.ovaries("his")) {
-
-    } else {
-      return "her";
-    }
-  });
-
-  M.PersonSchema.virtual("ovaries.pron").get(function() {
-    if (this.ovaries("he")) {
-
-    } else {
-      return "she";
-    }
-  });
-
   M.Person = mongoose.model('person', M.PersonSchema);
 
   M.MessageSchema = new mongoose.Schema({
@@ -106,6 +99,10 @@
       type: String,
       required: true,
       unique: true
+    },
+    flag: {
+      type: String,
+      required: false
     },
     created: {
       type: Date,

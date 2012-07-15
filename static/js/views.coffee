@@ -1,91 +1,54 @@
-window.FindPeopleView = Backbone.View.extend
-  el: "#find-people"
+window.ChooseView = Backbone.View.extend
+  el: "#choose"
+  selected: []
 
   events:
     "keyup #thebox": "search"
-    "click .create-group": "createGroup"
+    "click .join-group": "joinGroup"
+    "click .leave-group": "leaveGroup"
+    "click #go": "go"
 
   initialize: () ->
     @render()
 
   render: () ->
     @$el.show()
-    @$el.html Handlebars.templates.find_people()
+    @$el.html Handlebars.templates.finder(selected: @selected)
+    @$("#thebox").focus()
+
+  go: () ->
+    socket.emit "join groups", @selected, (err) ->
+      alert "server ack"
+
+  joinGroup: (e) ->
+    @selected.push
+      id: $(e.target).data("id")
+      name: $(e.target).text()
+    @render()
+
+  leaveGroup: (e) ->
+    id = $(e.target).data("id")
+    group = _.find @selected, (group) ->
+      group.id == id
+    @selected.splice _.indexOf(@selected, group), 1
+    @render()
 
   showGroups: (models) ->
     @$("#results").html Handlebars.templates.foobar(groups: models)
 
-  createGroup: (e) ->
-    name = $(e.target).data("name")
-    group = new Group name: name
-
-    success_cb = () ->
-      groups.add group
-      router.navigate "/groups/#{group.id}", true
-
-    error_cb = () ->
-      alert "OH SHIT SOMETHING BROKE"
-
-    group.save {}, {success: success_cb, error: error_cb}
-
   search: (e) ->
     fragment = @$("#thebox").val()
-    if fragment
-      matches = groups.filter (group) ->
-        ~group.get('name').indexOf fragment
+    if fragment.length
+      matches = harvard_courses.filter (course) ->
+        ~course.name.indexOf fragment
       if matches.length > 0
         @showGroups matches
+        @$("#thebox").parent().removeClass("error")
       else
         @$("#results").html Handlebars.templates.no_groups(name: fragment)
+        @$("#thebox").parent().addClass("error")
     else
       @render()
-
-  remove: () ->
-   @$el.hide()
-   @$el.children().remove()
-   return @
-
-window.FindGroupsView = Backbone.View.extend
-  el: "#find-groups"
-
-  events:
-    "keyup #thebox": "search"
-    "click .create-group": "createGroup"
-
-  initialize: () ->
-    @render()
-
-  render: () ->
-    @$el.show()
-    @$el.html Handlebars.templates.finder()
-
-  showGroups: (models) ->
-    @$("#results").html Handlebars.templates.foobar(groups: models)
-
-  createGroup: (e) ->
-    name = $(e.target).data("name")
-    group = new Group name: name
-
-    success_cb = () ->
-      groups.add group
-      router.navigate "/groups/#{group.id}", true
-
-    error_cb = () ->
-      alert "OH SNAP. SOMETHING BROKE."
-
-    group.save {}, {success: success_cb, error: error_cb}
-
-  search: (e) ->
-    fragment = @$("#thebox").val()
-    if fragment
-      matches = groups.filter (group) ->
-        ~group.get('name').indexOf fragment
-      if matches.length > 0
-        @showGroups matches
-      else
-        @$("#results").html Handlebars.templates.no_groups(name: fragment)
-    else
-      @$("#results").html "Start typing <3"
 
   remove: () ->
    @$el.hide()

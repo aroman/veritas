@@ -5,7 +5,7 @@ html, body {
   /*background-color: #FAFAFA;*/
 }
 
-body, input, select {
+body, input, select, button {
   font-family: "Happy Monkey";
 }
 
@@ -48,7 +48,40 @@ body, input, select {
   padding-bottom: 50px;
 }
 
-#results > span{
+#selected {
+  margin-left: 90px;
+  margin-right: 90px;  
+}
+
+#selected > table {
+  border-spacing: 0px 15px;
+  background-color: transparent;
+  border-collapse: separate;
+}
+
+td {
+  vertical-align: middle !important;
+  text-align: center;
+  background-color: #505e6e !important;
+  padding: 12px !important;
+}
+
+.round-left {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.round-right {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+#results {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+#results > span {
   word-wrap: break-word;
 }
 

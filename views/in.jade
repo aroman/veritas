@@ -3,13 +3,13 @@
     if failed
       .centex
         .alert.alert-error
-          | Username/password were incorrect. Try again?
+          | Email/password were incorrect. Try again?
     form#form.form-horizontal(action="", method="POST")
       legend Log in
       .control-group
-        .control-label username
+        .control-label email
         .controls
-          input(type="text", name="username", value=username)
+          input(type="text", name="email", value=email)
       .control-group
         .control-label password
         .controls

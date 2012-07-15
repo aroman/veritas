@@ -1,9 +1,35 @@
-<input id="thebox" type="text" autofocus="autofocus" placeholder="What floats your boat?" class="input-xlarge search-query"/>
-<br/>
-<br/>
-<br/>
-<div id="results">
-    Start typing to find things you're into.
-    <br><br>
-    Like swimming, hiphop, or comparative politics.
+<h2 style="font-size:40px">Almost done, I promise.</h2>
+
+<br>
+<br>
+
+<fieldset class="control-group">
+  <input id="thebox" type="text" autofocus="autofocus" placeholder="Start typing a course..." class="input-xlarge search-query">
+</fieldset>
+
+<br>
+
+<div id="results"> 
+  {{#if selected}}
+    <div id="selected">
+        <h3>Currently in these groups:</h3>
+      <table class="table">
+        {{#each selected}}
+          <tr>
+            <td class="round-left">
+              <span style="color:white">{{name}}</span>
+            </td>
+            <td class="round-right">
+              <button style="margin-right: 15px" class="btn btn-danger btn-mini leave-group pull-right" data-id="{{id}}">Leave</button>
+            </td>
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+  {{else}}
+    <span style="font-size:20px">You just need to select what courses you're in.</span>
+    <br>
+    <br>
+  {{/if}}
+  <button id="go" class="btn btn-success btn-large" {{#unless selected}} disabled="on" {{/unless}}>Done adding classes; onward!</button>
 </div>

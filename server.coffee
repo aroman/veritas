@@ -17,6 +17,11 @@ secrets    = require "./secrets"
 
 package_info = JSON.parse(fs.readFileSync "#{__dirname}/package.json", "utf-8")
 
+# http://stackoverflow.com/questions/2855865/jquery-validate-e-mail-address-regex
+isValidEmailAddress = (emailAddress) ->
+  pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i)
+  pattern.test emailAddress
+
 app = express.createServer()
 io = socketio.listen app
 
@@ -55,13 +60,13 @@ app.dynamicHelpers
     return package_info.version
 
 ensureSession = (req, res, next) ->
-  if not req.session.username
+  if not req.session.uid
     res.redirect "/?whence=#{req.url}"
   else
     next()
 
 app.get "/", (req, res) ->
-  if req.session.username
+  if req.session.uid
     res.redirect "/lounge"
   else
     res.render "index"
@@ -69,14 +74,14 @@ app.get "/", (req, res) ->
  
 app.get "/what", (req, res) ->
   res.render "what"
-    appmode: req.session.username
+    appmode: req.session.uid
 
 app.get "/who", (req, res) ->
   res.render "who"
-    appmode: req.session.username
+    appmode: req.session.uid
 
 app.get "/up", (req, res) ->
-  if req.session.username
+  if req.session.uid
     res.redirect "/lounge"
   else
     res.render "up"
@@ -86,12 +91,16 @@ app.get "/up", (req, res) ->
       dorm: ''
       notevil: ''
       ovaries: ''
-      username: ''
+      first: ''
+      last: ''
+      email: ''
       hid: ''
 
 app.post "/up", (req, res) ->
   hid = req.body.hid or ''
-  username = req.body.username
+  first = req.body.first
+  last = req.body.last
+  email = req.body.email
   password1 = req.body.password1
   password2 = req.body.password2
   ovaries = req.body.ovaries
@@ -107,15 +116,17 @@ app.post "/up", (req, res) ->
       dorm: dorm
       notevil: notevil
       ovaries: ovaries
-      username: username
+      first: first
+      last: last
+      email: email
 
   if password1 isnt password2
     fail()
-  else if username < 5 or username > 18
+  else if !first or !last
     fail()
   else if password1.length < 5
     fail()
-  else if " " in username
+  else if !isValidEmailAddress(email)
     fail()
   else if _.isUndefined(notevil)
     fail()
@@ -126,7 +137,9 @@ app.post "/up", (req, res) ->
   else
     person = new models.Person()
     person.hid = Number(hid)
-    person.username = username
+    person.first = first
+    person.last = last
+    person.email = email
     if ovaries
       person.ovaries = true
     else
@@ -139,34 +152,34 @@ app.post "/up", (req, res) ->
         fail()
       else
         # Log them in.
-        req.session.username = username
+        req.session.uid = person._id
         res.redirect "/lounge"
 
 app.get "/in", (req, res) ->
   res.render "in"
       appmode: false
       failed: false
-      username: ''
+      email: ''
 
 app.post "/in", (req, res) ->
-  username = req.body.username or ''
+  email = req.body.email or ''
   password = req.body.password
 
   fail = () ->
     res.render "in"
       appmode: false
       failed: true
-      username: username
+      email: email
 
   models.Person
     .findOne()
-    .where("username", username)
+    .where("email", email)
     .run (err, person) ->
       if err or not person
         fail()
       else
         if pwh.verify(password, person.password)
-          req.session.username = username
+          req.session.uid = person._id
           res.redirect "/lounge"
         else
           fail()
@@ -182,25 +195,14 @@ app.post "/validate", (req, res) ->
   else
     res.send "BUT SIRRR"
 
-app.post "/username", (req, res) ->
-  username = req.body.username
-  models.Person
-    .findOne()
-    .where("username", username)
-    .run (err, person) ->
-      if person
-        res.send "umad?"
-      else
-        res.send "OK"
-
 app.get "/people/:id", ensureSession, (req, res) ->
   if req.params.id is "me"
-    id = req.session.username
-  else
-    id = req.params.id
+    return res.redirect "/people/#{req.session.uid}"
+
+  id = req.params.id
   models.Person
     .findOne()
-    .where("username", id)
+    .where("_id", id)
     .populate("groups")
     .run (err, person) ->
       if err or not person
@@ -215,13 +217,30 @@ app.post "/people/:id", ensureSession, (req, res) ->
   res.render "person"
     appmode: true
 
+app.get "/choose", ensureSession, (req, res) ->
+  models.Group
+    .where("flag", "harvard-course")
+    .select("name")
+    .run (err, courses) ->
+      console.log err
+      res.render "choose"
+        appmode: true
+        courses: JSON.stringify courses
+
 app.get "/lounge*", ensureSession, (req, res) ->
-  username = req.session.username
+  return res.redirect "/choose"
+  uid = req.session.uid
   async.parallel [
     (cb) ->
       models.Group
         .find()
-        .populate("members", ["username"])
+        .populate("members", ["first", "last"])
+        .run cb
+    (cb) ->
+      models.Person
+        .findOne()
+        .where("_id", uid)
+        .select("first", "last")
         .run cb
   ],
   (err, results) ->
@@ -231,13 +250,17 @@ app.get "/lounge*", ensureSession, (req, res) ->
       # Copy the online list and add ourselves
       # to a local copy of it for bootstrap sake
       # if needed. (Initial page req.)
-      _online = _.clone online
-      unless _.has _online, username
-        _online[username] = 1
+      person = results[1]
+      courses = results[2]
+      online[uid] =
+        name: "#{person.first} #{person.last}"
+        id: uid
+      console.log courses
       res.render "lounge"
         appmode: true
         groups_bootstrap: JSON.stringify results[0]
-        online: JSON.stringify _.keys(_online)
+        online: JSON.stringify _.values(online)
+        harvard_courses: JSON.stringify []
 
 curses = [
   "fuck",
@@ -314,15 +337,19 @@ io.set "authorization", (data, accept) ->
     accept "No cookie transmitted.", false
 
 io.sockets.on "connection", (socket) ->
-  username = socket.handshake.session.username
-  socket.join username
+  uid = socket.handshake.session.uid
+  socket.join uid
 
-  if _.has online, username
-    online[username]++
-  else
-    online[username] = 1
+  models.Person
+    .findOne()
+    .where("_id", uid)
+    .select("first", "last")
+    .run (err, person) ->
+      online[uid] = 
+        name: "#{person.first} #{person.last}"
+        id: uid
 
-  socket.broadcast.emit "online", _.keys(online)
+  socket.broadcast.emit "online", _.values online
 
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
@@ -338,7 +365,7 @@ io.sockets.on "connection", (socket) ->
       (wf_callback) ->
         models.Person
           .findOne()
-          .where("username", username)
+          .where("uid", uid)
           .run wf_callback
       (account, wf_callback) ->
         group = new models.Group()
@@ -360,7 +387,7 @@ io.sockets.on "connection", (socket) ->
       (wf_callback) ->
         models.Person
           .findOne()
-          .where("username", username)
+          .where("uid", uid)
           .run wf_callback
       (account, wf_callback) ->
         models.Group
@@ -374,7 +401,7 @@ io.sockets.on "connection", (socket) ->
           wf_callback err, account, group
       (account, group, wf_callback) ->
         message =
-          username: username
+          uid: uid
           body: cussFilter body
         group.messages.push message
         group.members.push account
@@ -385,8 +412,39 @@ io.sockets.on "connection", (socket) ->
       io.sockets.emit "message", message: message, group: group._id
       cb err
 
+  socket.on "join groups", (groups, cb) ->
+    done = (err) ->
+      cb err
+
+    itr = (group_id, async_cb) ->
+      async.waterfall [
+        (wf_callback) ->
+          models.Person
+            .findOne()
+            .where("uid", uid)
+            .run wf_callback
+
+        (account, wf_callback) ->
+          models.Group
+            .findOne()
+            .where("_id", group_id)
+            .run (err, group) ->
+              wf_callback err, account, group
+
+        (account, group, wf_callback) ->
+          account.groups.push group
+          account.save (err, account) ->
+            wf_callback err, account, group
+
+        (account, group, wf_callback) ->
+          group.members.push account
+          group.save (err) ->
+            wf_callback err, group, message
+      ], async_cb
+
+    async.forEach groups, itr, done
+
   socket.on "disconnect", () ->
-    online[username]--
-    if online[username] is 0
-      delete online[username]
-    socket.broadcast.emit "online", _.keys(online)
+    if _.has online, uid
+      delete online[uid]
+    socket.broadcast.emit "online", _.values online

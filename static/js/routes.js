@@ -4,19 +4,7 @@
   window.Router = Backbone.Router.extend({
     current_view: null,
     routes: {
-      "find/:kind": "find",
       "groups/:id": "group"
-    },
-    find: function(kind) {
-      $('#welcome').hide();
-      if (!_.isNull(this.current_view)) {
-        this.current_view.remove();
-      }
-      if (kind === "groups") {
-        return this.current_view = new FindPeopleView();
-      } else {
-        return this.current_view = new FindGroupsView();
-      }
     },
     group: function(id) {
       var group;

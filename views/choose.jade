@@ -1,0 +1,8 @@
+.container
+  #choose.hero-unit.centex
+script(src='/js/views.js')
+script
+  window.socket = io.connect()
+
+  window.harvard_courses = !{courses};
+  window.chooseview = new ChooseView();

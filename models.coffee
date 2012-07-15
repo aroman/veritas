@@ -32,10 +32,17 @@ M.PersonSchema = new mongoose.Schema
     type: Number
     required: true
     unique: true
-  username:
+  first:
+    type: String
+    required: true
+  last:
+    type: String
+    required: true
+  email:
     type: String
     required: true
     unique: true
+    sparse: true
   password:
     type: String
     required: true
@@ -65,18 +72,6 @@ M.PersonSchema = new mongoose.Schema
 
   nickname: String
 
-M.PersonSchema
-  .virtual("ovaries.poss")
-  .get () ->
-    if @ovaries "his"
-    else "her"
-
-M.PersonSchema
-  .virtual("ovaries.pron")
-  .get () ->
-    if @ovaries "he"
-    else "she"
-
 M.Person = mongoose.model 'person', M.PersonSchema
 
 M.MessageSchema = new mongoose.Schema
@@ -96,6 +91,9 @@ M.GroupSchema = new mongoose.Schema
     type: String
     required: true
     unique: true
+  flag:
+    type: String
+    required: false
   created:
     type: Date
     required: true

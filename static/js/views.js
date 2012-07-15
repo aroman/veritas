@@ -2,119 +2,69 @@
 (function() {
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  window.FindPeopleView = Backbone.View.extend({
-    el: "#find-people",
+  window.ChooseView = Backbone.View.extend({
+    el: "#choose",
+    selected: [],
     events: {
       "keyup #thebox": "search",
-      "click .create-group": "createGroup"
+      "click .join-group": "joinGroup",
+      "click .leave-group": "leaveGroup",
+      "click #go": "go"
     },
     initialize: function() {
       return this.render();
     },
     render: function() {
       this.$el.show();
-      return this.$el.html(Handlebars.templates.find_people());
+      this.$el.html(Handlebars.templates.finder({
+        selected: this.selected
+      }));
+      return this.$("#thebox").focus();
+    },
+    go: function() {
+      return socket.emit("join groups", this.selected, function(err) {
+        return alert("server ack");
+      });
+    },
+    joinGroup: function(e) {
+      this.selected.push({
+        id: $(e.target).data("id"),
+        name: $(e.target).text()
+      });
+      return this.render();
+    },
+    leaveGroup: function(e) {
+      var group, id;
+      id = $(e.target).data("id");
+      group = _.find(this.selected, function(group) {
+        return group.id === id;
+      });
+      this.selected.splice(_.indexOf(this.selected, group), 1);
+      return this.render();
     },
     showGroups: function(models) {
       return this.$("#results").html(Handlebars.templates.foobar({
         groups: models
       }));
     },
-    createGroup: function(e) {
-      var error_cb, group, name, success_cb;
-      name = $(e.target).data("name");
-      group = new Group({
-        name: name
-      });
-      success_cb = function() {
-        groups.add(group);
-        return router.navigate("/groups/" + group.id, true);
-      };
-      error_cb = function() {
-        return alert("OH SHIT SOMETHING BROKE");
-      };
-      return group.save({}, {
-        success: success_cb,
-        error: error_cb
-      });
-    },
     search: function(e) {
       var fragment, matches;
       fragment = this.$("#thebox").val();
-      if (fragment) {
-        matches = groups.filter(function(group) {
-          return ~group.get('name').indexOf(fragment);
+      if (fragment.length) {
+        matches = harvard_courses.filter(function(course) {
+          return ~course.name.indexOf(fragment);
         });
         if (matches.length > 0) {
-          return this.showGroups(matches);
+          this.showGroups(matches);
+          return this.$("#thebox").parent().removeClass("error");
         } else {
-          return this.$("#results").html(Handlebars.templates.no_groups({
+          this.$("#results").html(Handlebars.templates.no_groups({
             name: fragment
           }));
+          return this.$("#thebox").parent().addClass("error");
         }
       } else {
         return this.render();
-      }
-    },
-    remove: function() {
-      this.$el.hide();
-      this.$el.children().remove();
-      return this;
-    }
-  });
-
-  window.FindGroupsView = Backbone.View.extend({
-    el: "#find-groups",
-    events: {
-      "keyup #thebox": "search",
-      "click .create-group": "createGroup"
-    },
-    initialize: function() {
-      return this.render();
-    },
-    render: function() {
-      this.$el.show();
-      return this.$el.html(Handlebars.templates.finder());
-    },
-    showGroups: function(models) {
-      return this.$("#results").html(Handlebars.templates.foobar({
-        groups: models
-      }));
-    },
-    createGroup: function(e) {
-      var error_cb, group, name, success_cb;
-      name = $(e.target).data("name");
-      group = new Group({
-        name: name
-      });
-      success_cb = function() {
-        groups.add(group);
-        return router.navigate("/groups/" + group.id, true);
-      };
-      error_cb = function() {
-        return alert("OH SNAP. SOMETHING BROKE.");
-      };
-      return group.save({}, {
-        success: success_cb,
-        error: error_cb
-      });
-    },
-    search: function(e) {
-      var fragment, matches;
-      fragment = this.$("#thebox").val();
-      if (fragment) {
-        matches = groups.filter(function(group) {
-          return ~group.get('name').indexOf(fragment);
-        });
-        if (matches.length > 0) {
-          return this.showGroups(matches);
-        } else {
-          return this.$("#results").html(Handlebars.templates.no_groups({
-            name: fragment
-          }));
-        }
-      } else {
-        return this.$("#results").html("Start typing <3");
       }
     },
     remove: function() {
