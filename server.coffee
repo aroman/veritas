@@ -33,6 +33,11 @@ smtp = mailer.createTransport "SMTP",
     user: secrets.EMAIL_ADDRESS
     pass: secrets.EMAIL_PASSWORD
 
+io.set 'transports', [
+  'xhr-polling',
+  'jsonp-polling'
+]
+
 sessionStore = new MongoStore
   db: 'keeba'
   url: secrets.MONGO_URI

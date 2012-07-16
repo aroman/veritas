@@ -53,6 +53,8 @@
     }
   });
 
+  io.set('transports', ['xhr-polling', 'jsonp-polling']);
+
   sessionStore = new MongoStore({
     db: 'keeba',
     url: secrets.MONGO_URI,
