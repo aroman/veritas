@@ -241,7 +241,7 @@
   app.post("/validate", function(req, res) {
     var hid;
     hid = req.body.hid;
-    if (hid.slice(3, 5) === "66" && hid.length === 8) {
+    if (hid.slice(1, 3) === "08" && hid.length === 8) {
       return res.send("OK");
     } else {
       return res.send("BUT SIRRR");
@@ -265,12 +265,6 @@
           person: person
         });
       }
-    });
-  });
-
-  app.post("/people/:id", ensureSession, function(req, res) {
-    return res.render("person", {
-      appmode: true
     });
   });
 

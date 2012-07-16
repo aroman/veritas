@@ -192,7 +192,7 @@ app.get "/out", (req, res) ->
 
 app.post "/validate", (req, res) ->
   hid = req.body.hid
-  if hid[3..4] is "66" and hid.length is 8
+  if hid[1..2] is "08" and hid.length is 8
     res.send "OK"
   else
     res.send "BUT SIRRR"
@@ -214,10 +214,6 @@ app.get "/people/:id", ensureSession, (req, res) ->
         res.render "person"
           appmode: true
           person: person
-
-app.post "/people/:id", ensureSession, (req, res) ->
-  res.render "person"
-    appmode: true
 
 app.get "/choose", ensureSession, (req, res) ->
   models.Group
