@@ -52,10 +52,6 @@ M.PersonSchema = new mongoose.Schema
     type: Date
     required: true
     default: Date.now()
-  firstrun:
-    type: Boolean
-    required: true
-    default: true
   dorm:
     type: String
     required: true
@@ -63,6 +59,9 @@ M.PersonSchema = new mongoose.Schema
   ovaries:
     type: Boolean
     required: true
+  reset_key:
+    type: String
+    required: false
 
   groups:
     [

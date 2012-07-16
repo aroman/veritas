@@ -134,7 +134,7 @@ app.post "/up", (req, res) ->
     fail()
   else if dorm not in models.DORMS
     fail()
-  else if hid[3..4] isnt "66" or hid.length isnt 8
+  else if hid[1..2] isnt "08" or hid.length isnt 8
     fail()
   else
     person = new models.Person()
@@ -153,9 +153,30 @@ app.post "/up", (req, res) ->
         console.log err
         fail()
       else
-        # Log them in.
-        req.session.uid = person._id
-        res.redirect "/lounge"
+        async.waterfall [
+          (wf_callback) ->
+            models.Group
+              .findOne()
+              .where("name", person.dorm)
+              .run (err, group) ->
+                wf_callback err, group
+
+          (group, wf_callback) ->
+            person.groups.addToSet group
+            person.save (err) ->
+              wf_callback err, group
+
+          (group, wf_callback) ->
+            group.members.addToSet person
+            group.save wf_callback
+        ], (err) ->
+          if err
+            console.log err
+            fail()
+          else
+            # Log them in.
+            req.session.uid = person._id
+            res.redirect "/lounge"
 
 app.get "/in", (req, res) ->
   res.render "in"
@@ -189,6 +210,35 @@ app.post "/in", (req, res) ->
 app.get "/out", (req, res) ->
   req.session.destroy()
   res.redirect "/"
+
+# app.get "/forgot", ensureSession, (req, res) ->
+#   res.render "forgot"
+#     appmode: false
+#     person: person
+
+# app.post "/forgot", ensureSession, (req, res) ->
+  
+#   res.render "forgot"
+#     appmode: false
+#     person: person
+
+# app.get "/forgot/:id", ensureSession, (req, res) ->
+#   if req.params.id is "me"
+#     return res.redirect "/people/#{req.session.uid}"
+
+#   id = req.params.id
+#   models.Person
+#     .findOne()
+#     .where("_id", id)
+#     .populate("groups")
+#     .run (err, person) ->
+#       if err or not person
+#         res.render "error"
+#           appmode: false
+#       else
+#         res.render "person"
+#           appmode: true
+#           person: person
 
 app.post "/validate", (req, res) ->
   hid = req.body.hid
@@ -230,36 +280,37 @@ app.get "/lounge*", ensureSession, (req, res) ->
 
   async.parallel [
     (cb) ->
-      models.Group
-        .find()
-        .populate("members", ["first", "last"])
-        .run cb
-    (cb) ->
       models.Person
         .findOne()
         .where("_id", uid)
         .select("first", "last", "groups")
         .populate("groups")
         .run cb
+    (cb) ->
+      models.Group
+        .where("flag", "harvard-global")
+        .populate("members", ["first", "last"])
+        .run cb
   ],
   (err, results) ->
     if err
       res.render "error"
     else
-      person = results[1]
-      unless person
+      person = results[0]
+      global_groups = results[1]
+
+      if !person or !global_groups
         return res.redirect "/out"
-      unless person.groups.length
+      unless person.groups.length > 1 # 1 = dorm
         return res.redirect "/choose"
-      courses = results[2]
+
       online[uid] =
         name: "#{person.first} #{person.last}"
         id: uid
       res.render "lounge"
         appmode: true
-        groups_bootstrap: JSON.stringify person.groups
+        groups_bootstrap: JSON.stringify _.union(person.groups, global_groups)
         online: JSON.stringify _.values(online)
-        harvard_courses: JSON.stringify []
 
 curses = [
   "fuck",

@@ -54,11 +54,6 @@
       required: true,
       "default": Date.now()
     },
-    firstrun: {
-      type: Boolean,
-      required: true,
-      "default": true
-    },
     dorm: {
       type: String,
       required: true,
@@ -67,6 +62,10 @@
     ovaries: {
       type: Boolean,
       required: true
+    },
+    reset_key: {
+      type: String,
+      required: false
     },
     groups: [
       {

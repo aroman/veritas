@@ -29,7 +29,6 @@ window.ChooseView = Backbone.View.extend
       else
         window.location.replace("#{location.origin}/lounge");
 
-
     socket.emit "join groups", _.pluck(@selected, "_id"), ack
 
   joinGroup: (e) ->

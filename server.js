@@ -173,7 +173,7 @@
       return fail();
     } else if (__indexOf.call(models.DORMS, dorm) < 0) {
       return fail();
-    } else if (hid.slice(3, 5) !== "66" || hid.length !== 8) {
+    } else if (hid.slice(1, 3) !== "08" || hid.length !== 8) {
       return fail();
     } else {
       person = new models.Person();
@@ -193,8 +193,29 @@
           console.log(err);
           return fail();
         } else {
-          req.session.uid = person._id;
-          return res.redirect("/lounge");
+          return async.waterfall([
+            function(wf_callback) {
+              return models.Group.findOne().where("name", person.dorm).run(function(err, group) {
+                return wf_callback(err, group);
+              });
+            }, function(group, wf_callback) {
+              person.groups.addToSet(group);
+              return person.save(function(err) {
+                return wf_callback(err, group);
+              });
+            }, function(group, wf_callback) {
+              group.members.addToSet(person);
+              return group.save(wf_callback);
+            }
+          ], function(err) {
+            if (err) {
+              console.log(err);
+              return fail();
+            } else {
+              req.session.uid = person._id;
+              return res.redirect("/lounge");
+            }
+          });
         }
       });
     }
@@ -283,32 +304,31 @@
     uid = req.session.uid;
     return async.parallel([
       function(cb) {
-        return models.Group.find().populate("members", ["first", "last"]).run(cb);
-      }, function(cb) {
         return models.Person.findOne().where("_id", uid).select("first", "last", "groups").populate("groups").run(cb);
+      }, function(cb) {
+        return models.Group.where("flag", "harvard-global").populate("members", ["first", "last"]).run(cb);
       }
     ], function(err, results) {
-      var courses, person;
+      var global_groups, person;
       if (err) {
         return res.render("error");
       } else {
-        person = results[1];
-        if (!person) {
+        person = results[0];
+        global_groups = results[1];
+        if (!person || !global_groups) {
           return res.redirect("/out");
         }
-        if (!person.groups.length) {
+        if (!(person.groups.length > 1)) {
           return res.redirect("/choose");
         }
-        courses = results[2];
         online[uid] = {
           name: "" + person.first + " " + person.last,
           id: uid
         };
         return res.render("lounge", {
           appmode: true,
-          groups_bootstrap: JSON.stringify(person.groups),
-          online: JSON.stringify(_.values(online)),
-          harvard_courses: JSON.stringify([])
+          groups_bootstrap: JSON.stringify(_.union(person.groups, global_groups)),
+          online: JSON.stringify(_.values(online))
         });
       }
     });

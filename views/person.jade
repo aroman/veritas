@@ -8,12 +8,12 @@
     br
     if person.groups.length > 0
       if person.ovaries
-        h3 She's in these courses:
+        h3 She's in these groups:
       else 
-        h3 He's in these courses:
+        h3 He's in these groups:
       ul
         each group in person.groups
           li
             a.find-link(style="color:white;font-size:17px", href="/lounge/groups/#{group.id}", data-route) #{group.name}
     else
-      h3 He hasn't listed any courses!
+      h3 He hasn't listed any groups!
