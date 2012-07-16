@@ -1,0 +1,24 @@
+.container-fluid
+  .hero-unit.centex
+    if failed
+      .centex
+        .alert.alert-error
+          | Hmm, doesn't look like that email is registered.
+          | Did you spell it correctly?
+    h1 Forgot your password, huh?
+    span(style="font-size:20px") Type in your email address and we'll help you reset it.
+    br
+    br
+    form#forgotform(action="", method="POST")
+      .control-group
+        .controls
+          input#email(type="text", name="email", placeholder="email", autofocus, value=email)
+      .control-group
+        .controls
+          input#go.btn.btn-large.btn-info(type="submit", value="Submit (with remorse)")
+:coffeescript
+  go = $("#go")
+
+  go.click () ->
+    go.button("loading")
+    $("#forgotform").submit()

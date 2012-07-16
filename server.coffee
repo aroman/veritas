@@ -5,8 +5,10 @@ fs         = require "fs"
 os         = require "os"
 pwh        = require "password-hash"
 chbs       = require "connect-handlebars"
+uuid       = require "node-uuid"
 async      = require "async"
 colors     = require "colors"
+mailer     = require "nodemailer"
 connect    = require "connect"
 express    = require "express"
 socketio   = require "socket.io"
@@ -24,6 +26,12 @@ isValidEmailAddress = (emailAddress) ->
 
 app = express.createServer()
 io = socketio.listen app
+
+smtp = mailer.createTransport "SMTP",
+  service: "Gmail"
+  auth:
+    user: secrets.EMAIL_ADDRESS
+    pass: secrets.EMAIL_PASSWORD
 
 sessionStore = new MongoStore
   db: 'keeba'
@@ -211,34 +219,97 @@ app.get "/out", (req, res) ->
   req.session.destroy()
   res.redirect "/"
 
-# app.get "/forgot", ensureSession, (req, res) ->
-#   res.render "forgot"
-#     appmode: false
-#     person: person
+app.get "/forgot", (req, res) ->
+  res.render "forgot"
+    appmode: false
+    failed: false
+    email: ''
 
-# app.post "/forgot", ensureSession, (req, res) ->
+app.get "/forgot/sent", (req, res) ->
+  res.render "forgot-sent"
+    appmode: false
 
-#   res.render "forgot"
-#     appmode: false
-#     person: person
+app.get "/forgot/complete", (req, res) ->
+  res.render "forgot-complete"
+    appmode: false
 
-# app.get "/forgot/:id", ensureSession, (req, res) ->
-#   if req.params.id is "me"
-#     return res.redirect "/people/#{req.session.uid}"
+app.post "/forgot", (req, res) ->
+  email = req.body.email
+  models.Person
+    .findOne()
+    .where("email", email)
+    .run (err, person) ->
+      if err or not person
+        res.render "forgot"
+          appmode: false
+          failed: true
+          email: email
+      else
+        reset_token = uuid.v4()
+        reset_url = "#{req.headers.origin}/forgot/#{reset_token}"
+        options =
+          from: "Veritas <#{secrets.EMAIL_ADDRESS}>"
+          to: person.email
+          subject: "Password reset"
+          html: """
+                <pre>
+                  Hey #{person.first},
 
-#   id = req.params.id
-#   models.Person
-#     .findOne()
-#     .where("_id", id)
-#     .populate("groups")
-#     .run (err, person) ->
-#       if err or not person
-#         res.render "error"
-#           appmode: false
-#       else
-#         res.render "person"
-#           appmode: true
-#           person: person
+                  Word on the street is that you want to reset your password on Veritas.
+
+                  To do so, just click here: <a href="#{reset_url}">#{reset_url}</a>
+
+                  If you didn't request this reset, you can safely ignore this message.
+
+                  Peace out.
+                </pre>
+                """
+        async.parallel [
+          (cb) ->
+            models.Person.update {email: email}, {reset_token: reset_token}, cb
+          (cb) ->
+            smtp.sendMail options, cb
+        ], (err) ->
+          if err
+            console.log err
+            res.render "error"
+              appmode: false
+          else
+            res.redirect "/forgot/sent"
+
+app.get "/forgot/:token", (req, res) ->
+  reset_token = req.params.token
+  models.Person
+    .findOne()
+    .where("reset_token", reset_token)
+    .run (err, person) ->
+      if err or not person
+        res.render "error"
+          appmode: false
+          failed: false
+      else
+        res.render "forgot-reset"
+          appmode: false
+          failed: false
+
+app.post "/forgot/:token", (req, res) ->
+  reset_token = req.params.token
+  pw1 = req.body.pw1
+  pw2 = req.body.pw2
+  if pw1 isnt pw2
+    res.render "forgot-reset"
+      appmode: false
+      failed: true
+  else
+    models.Person.update {reset_token: reset_token},
+      {password: pwh.generate(pw1), $unset: {reset_token: 1}},
+      (err, person) ->
+        if err or not person
+          console.log err
+          res.render "error"
+            appmode: false
+        else
+          res.redirect "/forgot/complete"
 
 app.post "/validate", (req, res) ->
   hid = req.body.hid

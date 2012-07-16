@@ -1,0 +1,61 @@
+.container-fluid
+  .hero-unit
+    if failed
+      .centex
+        .alert.alert-error
+          | Hmm, something went wrong. Try again or contact Avi.
+    h1.centex Let's turn over a new leaf.
+    //- span(style="font-size:20px") Type in your email address and we'll help you reset it.
+    br
+    br
+    form#forgotform.form-horizontal(action="", method="POST")
+      .control-group
+        .control-label new password
+        .controls
+          input#pw1(type="password", name="pw1", autofocus)
+          span.help-block
+      .control-group
+        .control-label new password (again)
+        .controls
+          input#pw2(type="password", name="pw2")
+          span.help-block
+      .control-group
+        .controls
+          input#go.btn.btn-large.btn-success.pull-right(type="submit", value="Reset password")
+:coffeescript
+  pw1 = $("#pw1")
+  pw2 = $("#pw2")
+  go = $("#go")
+
+  bitch = (e, message) ->
+    $e = $(e)
+    $e.parent().parent().addClass "error"
+    $e.siblings(".help-block").text message
+    false
+
+  chill = (e) ->
+    $e = $(e)
+    $e.parent().parent().removeClass "error"
+    $e.siblings(".help-block").text ''
+    true
+
+  validate = () ->
+    kosher = true
+
+    if not pw1.val()
+        kosher = bitch pw1, "password can't be blank"
+    else
+      if pw1.val().length <= 5
+        kosher = bitch pw1, "password must be > 5 characters"
+      else
+        chill pw1
+
+    if pw1.val() isnt pw2.val()
+      kosher = bitch pw2, "password didn't match"
+    else
+      chill pw2
+
+    kosher
+
+  go.click (e) ->
+    false unless validate()
