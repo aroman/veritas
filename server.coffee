@@ -142,7 +142,8 @@ app.post "/up", (req, res) ->
     fail()
   else if dorm not in models.DORMS
     fail()
-  else if hid[1..2] isnt "08" or hid.length isnt 8
+  # else if hid[1..2] isnt "08" or hid.length isnt 8
+  else if hid.length isnt 8
     fail()
   else
     person = new models.Person()
@@ -313,7 +314,7 @@ app.post "/forgot/:token", (req, res) ->
 
 app.post "/validate", (req, res) ->
   hid = req.body.hid
-  if hid[1..2] is "08" and hid.length is 8
+  if hid.length is 8
     res.send "OK"
   else
     res.send "BUT SIRRR"
