@@ -315,9 +315,9 @@ app.post "/forgot/:token", (req, res) ->
 app.post "/validate", (req, res) ->
   hid = req.body.hid
   if hid.length < 7
-    res.send "OK"
-  else
     res.send "BUT SIRRR"
+  else
+    res.send "OK"
 
 app.get "/people/:id", ensureSession, (req, res) ->
   if req.params.id is "me"

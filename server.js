@@ -388,9 +388,9 @@
     var hid;
     hid = req.body.hid;
     if (hid.length < 7) {
-      return res.send("OK");
-    } else {
       return res.send("BUT SIRRR");
+    } else {
+      return res.send("OK");
     }
   });
 
