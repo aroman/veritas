@@ -99,7 +99,7 @@
 
   ensureSession = function(req, res, next) {
     if (!req.session.uid) {
-      return res.redirect("/?whence=" + req.url);
+      return res.redirect("/in?whence=" + req.url);
     } else {
       return next();
     }

@@ -69,7 +69,7 @@ app.dynamicHelpers
 
 ensureSession = (req, res, next) ->
   if not req.session.uid
-    res.redirect "/?whence=#{req.url}"
+    res.redirect "/in?whence=#{req.url}"
   else
     next()
 
