@@ -27,11 +27,9 @@
       $(e.target).button("loading");
       this.$(":input").prop('disabled', true);
       ack = function(err) {
-        console.log("ack");
         if (err) {
           $(e.target).button('reset');
           _this.$(":input").prop('disabled', false);
-          console.log("fail");
           return _this.$("#error").show();
         } else {
           return window.location.replace("" + location.origin + "/lounge");
@@ -183,7 +181,6 @@
       router.on('highlight', this.highlightSidebar, this);
       groups.on("add remove", this.updateGroupList, this);
       socket.on("online", function(people) {
-        console.log(people);
         return _this.updatePersonList(people);
       });
       return socket.on("message", function(data) {
@@ -221,6 +218,7 @@
       return this.highlightSidebar();
     },
     updatePersonList: function(people) {
+      console.log(people);
       return this.$("#people").html(Handlebars.templates.sidebar_people({
         people: people
       }));

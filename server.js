@@ -98,6 +98,8 @@
       return res.redirect("/lounge");
     } else {
       return res.render("index", {
+        failed: false,
+        email: '',
         appmode: false
       });
     }
@@ -297,6 +299,9 @@
         return res.render("error");
       } else {
         person = results[1];
+        if (!person) {
+          return res.redirect("/out");
+        }
         if (!person.groups.length) {
           return res.redirect("/choose");
         }
@@ -352,12 +357,12 @@
     uid = socket.handshake.session.uid;
     socket.join(uid);
     models.Person.findOne().where("_id", uid).select("first", "last").run(function(err, person) {
-      return online[uid] = {
+      online[uid] = {
         name: "" + person.first + " " + person.last,
         id: uid
       };
+      return socket.broadcast.emit("online", _.values(online));
     });
-    socket.broadcast.emit("online", _.values(online));
     sync = function(model, method, data) {
       var event_name;
       event_name = "" + model + "/" + data._id + ":" + method;

@@ -22,11 +22,9 @@ window.ChooseView = Backbone.View.extend
     @$(":input").prop('disabled', true)
 
     ack = (err) =>
-      console.log "ack"
       if err
         $(e.target).button('reset')
         @$(":input").prop('disabled', false)
-        console.log "fail"
         @$("#error").show()
       else
         window.location.replace("#{location.origin}/lounge");
@@ -166,7 +164,6 @@ window.AppView = Backbone.View.extend
     router.on 'highlight', this.highlightSidebar, this
     groups.on "add remove", @updateGroupList, this
     socket.on "online", (people) =>
-      console.log people
       @updatePersonList people
     socket.on "message", (data) =>
       group = groups.get data.group
@@ -201,6 +198,7 @@ window.AppView = Backbone.View.extend
     @highlightSidebar()
 
   updatePersonList: (people) ->
+    console.log people
     @$("#people").html Handlebars.templates.sidebar_people(people: people)
 
   highlightSidebar: () ->

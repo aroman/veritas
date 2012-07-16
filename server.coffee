@@ -70,6 +70,8 @@ app.get "/", (req, res) ->
     res.redirect "/lounge"
   else
     res.render "index"
+      failed: false
+      email: ''
       appmode: false
  
 app.get "/what", (req, res) ->
@@ -249,6 +251,8 @@ app.get "/lounge*", ensureSession, (req, res) ->
       res.render "error"
     else
       person = results[1]
+      unless person
+        return res.redirect "/out"
       unless person.groups.length
         return res.redirect "/choose"
       courses = results[2]
@@ -347,8 +351,7 @@ io.sockets.on "connection", (socket) ->
       online[uid] = 
         name: "#{person.first} #{person.last}"
         id: uid
-
-  socket.broadcast.emit "online", _.values online
+      socket.broadcast.emit "online", _.values online
 
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
