@@ -508,6 +508,9 @@
       return io.sockets.emit(event_name, data);
     };
     socket.on("group:message", function(group_id, body, cb) {
+      if (body.length > 1000) {
+        return cb(true, "length");
+      }
       return async.waterfall([
         function(wf_callback) {
           return models.Person.findOne().where("_id", uid).run(function(err, account) {

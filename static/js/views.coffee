@@ -144,12 +144,15 @@ window.GroupView = Backbone.View.extend
   addMessage: (e) ->
     if e.keyCode is 13
       message = @$(e.target).val()
-      @$(e.target).val('')
       if message
-        socket.emit "group:message", @model.id, message, (err, res) =>
+        socket.emit "group:message", @model.id, message, (err, reason) =>
           if err
-            alert "Oh snap. Something broke. You should yell at Avi."
+            if reason is "length"
+              alert "Message too large (> 1000 characters) to post."
+            else
+              alert "Message failed for an unknown reason. Yell at Avi."
           else
+            @$(e.target).val('')
             @render
 
   remove: () ->

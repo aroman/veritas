@@ -153,12 +153,16 @@
         _this = this;
       if (e.keyCode === 13) {
         message = this.$(e.target).val();
-        this.$(e.target).val('');
         if (message) {
-          return socket.emit("group:message", this.model.id, message, function(err, res) {
+          return socket.emit("group:message", this.model.id, message, function(err, reason) {
             if (err) {
-              return alert("Oh snap. Something broke. You should yell at Avi.");
+              if (reason === "length") {
+                return alert("Message too large (> 1000 characters) to post.");
+              } else {
+                return alert("Message failed for an unknown reason. Yell at Avi.");
+              }
             } else {
+              _this.$(e.target).val('');
               return _this.render;
             }
           });

@@ -504,6 +504,8 @@ io.sockets.on "connection", (socket) ->
   #     cb err, group
 
   socket.on "group:message", (group_id, body, cb) ->
+    if body.length > 1000
+      return cb true, "length"
     # MELIOR: Use one idempotent operation.
     async.waterfall [
       (wf_callback) ->
