@@ -149,7 +149,7 @@
   });
 
   app.post("/up", function(req, res) {
-    var dorm, email, fail, first, hid, last, notevil, ovaries, password1, password2, person;
+    var dorm, email, fail, first, hid, last, notevil, ovaries, password1, password2, person, _ref;
     hid = req.body.hid || '';
     first = req.body.first;
     last = req.body.last;
@@ -185,7 +185,7 @@
       return fail();
     } else if (__indexOf.call(models.DORMS, dorm) < 0) {
       return fail();
-    } else if (hid.length !== 8) {
+    } else if ((_ref = hid.length) !== 8 && _ref !== 9) {
       return fail();
     } else {
       person = new models.Person();
@@ -385,9 +385,9 @@
   });
 
   app.post("/validate", function(req, res) {
-    var hid;
+    var hid, _ref;
     hid = req.body.hid;
-    if (hid.length === 8) {
+    if ((_ref = hid.length) === 8 || _ref === 9) {
       return res.send("OK");
     } else {
       return res.send("BUT SIRRR");
