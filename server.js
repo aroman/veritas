@@ -395,7 +395,8 @@
         }, function(account, group, wf_callback) {
           var message;
           message = {
-            username: account.first,
+            first: account.first,
+            person_id: account._id,
             body: cussFilter(body)
           };
           group.messages.push(message);

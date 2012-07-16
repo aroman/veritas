@@ -217,7 +217,7 @@ app.get "/out", (req, res) ->
 #     person: person
 
 # app.post "/forgot", ensureSession, (req, res) ->
-  
+
 #   res.render "forgot"
 #     appmode: false
 #     person: person
@@ -276,6 +276,7 @@ app.get "/choose", ensureSession, (req, res) ->
         courses: JSON.stringify courses
 
 app.get "/lounge*", ensureSession, (req, res) ->
+  #FIXME: magic
   uid = req.session.uid
 
   async.parallel [
@@ -448,7 +449,8 @@ io.sockets.on "connection", (socket) ->
             wf_callback err, account, group
       (account, group, wf_callback) ->
         message =
-          username: account.first
+          first: account.first
+          person_id: account._id
           body: cussFilter body
         group.messages.push message
         group.save (err) ->

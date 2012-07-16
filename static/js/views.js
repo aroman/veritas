@@ -113,6 +113,7 @@
     },
     render: function() {
       this.$el.show();
+      console.log(this.colorize(this.model.toJSON()));
       this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
       this.$("#messages").scrollTop(1234567890);
       this.$("#chat-input").focus();
@@ -121,18 +122,18 @@
       });
       return app.updateGroupList();
     },
-    getColor: function(username) {
-      if (!_.has(this.colors, username)) {
-        this.colors[username] = this.color_bank[Math.floor(Math.random() * this.color_bank.length)];
+    getColor: function(person_id) {
+      if (!_.has(this.colors, person_id)) {
+        this.colors[person_id] = this.color_bank[Math.floor(Math.random() * this.color_bank.length)];
       }
-      return this.colors[username];
+      return this.colors[person_id];
     },
     colorize: function(group) {
       var colorized,
         _this = this;
       colorized = [];
       _.each(group.messages, function(message) {
-        message.color = _this.getColor(message.username);
+        message.color = _this.getColor(message.person_id);
         return colorized.push(message);
       });
       group.messages = colorized;
@@ -140,7 +141,7 @@
     },
     pushMessage: function(message) {
       var str;
-      str = '<p><span style="color:' + this.getColor(message.username) + '">' + message.username + ': </span>' + message.body + '</p>';
+      str = '<p><a href="/people/' + message.person_id + '"" style="color:' + this.getColor(message.person_id) + '">' + message.first + ': </a>' + message.body + '</p>';
       this.$("#messages").append(str);
       return this.$("#messages").scrollTop(1234567890);
     },

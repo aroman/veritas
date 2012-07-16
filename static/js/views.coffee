@@ -109,6 +109,7 @@ window.GroupView = Backbone.View.extend
 
   render: () ->
     @$el.show()
+    console.log @colorize(@model.toJSON())
     @$('.inner').html Handlebars.templates.group @colorize(@model.toJSON())
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
@@ -116,21 +117,21 @@ window.GroupView = Backbone.View.extend
     @model.set unread: 0
     app.updateGroupList()
 
-  getColor: (username) ->
-    unless _.has @colors, username
-      @colors[username] = @color_bank[Math.floor(Math.random() * @color_bank.length)]
-    @colors[username]
+  getColor: (person_id) ->
+    unless _.has @colors, person_id
+      @colors[person_id] = @color_bank[Math.floor(Math.random() * @color_bank.length)]
+    @colors[person_id]
 
   colorize: (group) ->
     colorized = []
     _.each group.messages, (message) =>
-      message.color = @getColor message.username
+      message.color = @getColor message.person_id
       colorized.push message
     group.messages = colorized
     return group
 
   pushMessage: (message) ->
-    str = '<p><span style="color:'+@getColor(message.username)+'">'+message.username+': </span>'+message.body+'</p>'
+    str = '<p><a href="/people/'+message.person_id+'"" style="color:'+@getColor(message.person_id)+'">'+message.first+': </a>'+message.body+'</p>'
     @$("#messages").append(str)
     @$("#messages").scrollTop 1234567890
 

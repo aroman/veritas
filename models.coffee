@@ -74,7 +74,8 @@ M.PersonSchema = new mongoose.Schema
 M.Person = mongoose.model 'person', M.PersonSchema
 
 M.MessageSchema = new mongoose.Schema
-  username: String
+  first: String
+  person_id: String
   body:
     type: String
     required: true
