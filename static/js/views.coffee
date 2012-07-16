@@ -27,7 +27,7 @@ window.ChooseView = Backbone.View.extend
         @$(":input").prop('disabled', false)
         @$("#error").show()
       else
-        window.location.replace("#{location.origin}/lounge");
+        window.location.replace("#{location.protocol}//#{location.host}/lounge");
 
     socket.emit "join groups", _.pluck(@selected, "_id"), ack
 

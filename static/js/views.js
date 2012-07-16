@@ -32,7 +32,7 @@
           _this.$(":input").prop('disabled', false);
           return _this.$("#error").show();
         } else {
-          return window.location.replace("" + location.origin + "/lounge");
+          return window.location.replace("" + location.protocol + "//" + location.host + "/lounge");
         }
       };
       return socket.emit("join groups", _.pluck(this.selected, "_id"), ack);
