@@ -22,7 +22,7 @@
       });
     },
     comparator: function(group) {
-      return group.get("name");
+      return group.get("flag") || group.get("name");
     }
   });
 

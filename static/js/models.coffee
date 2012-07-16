@@ -20,4 +20,4 @@ window.Groups = Backbone.Collection.extend
       @add group
 
   comparator: (group) ->
-    group.get "name"
+    group.get("flag") or group.get "name"
