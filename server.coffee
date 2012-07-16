@@ -247,7 +247,7 @@ app.post "/forgot", (req, res) ->
           email: email
       else
         reset_token = uuid.v4()
-        reset_url = "#{req.headers.origin}/forgot/#{reset_token}"
+        reset_url = "http://#{req.headers.host}/forgot/#{reset_token}"
         options =
           from: "Veritas <#{secrets.EMAIL_ADDRESS}>"
           to: person.email
