@@ -149,7 +149,7 @@
   });
 
   app.post("/up", function(req, res) {
-    var dorm, email, fail, first, hid, last, notevil, ovaries, password1, password2, person, _ref;
+    var dorm, email, fail, first, hid, last, notevil, ovaries, password1, password2, person;
     hid = req.body.hid || '';
     first = req.body.first;
     last = req.body.last;
@@ -185,7 +185,7 @@
       return fail();
     } else if (__indexOf.call(models.DORMS, dorm) < 0) {
       return fail();
-    } else if ((_ref = hid.length) !== 8 && _ref !== 9) {
+    } else if (hid.length !== 8 || hid.length !== 9) {
       return fail();
     } else {
       person = new models.Person();

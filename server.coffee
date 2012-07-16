@@ -143,7 +143,7 @@ app.post "/up", (req, res) ->
   else if dorm not in models.DORMS
     fail()
   # else if hid[1..2] isnt "08" or hid.length isnt 8
-  else if hid.length not in [8,9]
+  else if hid.length isnt 8 or hid.length isnt 9
     fail()
   else
     person = new models.Person()
