@@ -113,8 +113,10 @@
     },
     render: function() {
       this.$el.show();
-      console.log(this.colorize(this.model.toJSON()));
       this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
+      if (this.model.get('messages').length === 0) {
+        this.$("#messages").html("<div id=\"emptybit\" class=\"centex\">\n  <i>No messages yet :'(\n</div>");
+      }
       this.$("#messages").scrollTop(1234567890);
       this.$("#chat-input").focus();
       this.model.set({
@@ -142,6 +144,7 @@
     pushMessage: function(message) {
       var str;
       str = '<p><a href="/people/' + message.person_id + '"" style="color:' + this.getColor(message.person_id) + '">' + message.first + ': </a>' + message.body + '</p>';
+      this.$("#emptybit").hide();
       this.$("#messages").append(str);
       return this.$("#messages").scrollTop(1234567890);
     },

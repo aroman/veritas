@@ -109,8 +109,13 @@ window.GroupView = Backbone.View.extend
 
   render: () ->
     @$el.show()
-    console.log @colorize(@model.toJSON())
     @$('.inner').html Handlebars.templates.group @colorize(@model.toJSON())
+    if @model.get('messages').length is 0
+      @$("#messages").html """
+        <div id="emptybit" class="centex">
+          <i>No messages yet :'(
+        </div>
+      """
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
     @$("#chat-input").focus()
@@ -132,6 +137,7 @@ window.GroupView = Backbone.View.extend
 
   pushMessage: (message) ->
     str = '<p><a href="/people/'+message.person_id+'"" style="color:'+@getColor(message.person_id)+'">'+message.first+': </a>'+message.body+'</p>'
+    @$("#emptybit").hide()
     @$("#messages").append(str)
     @$("#messages").scrollTop 1234567890
 
