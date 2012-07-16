@@ -8,7 +8,7 @@
         br
         br
         img.successkid(src="/img/success.png")
-        h2 Click on a group to the left.
+        h2 Click on a group in the sidebar to the left.
         br
       #group(style="display: none; margin-top:10px")
         .inner
@@ -21,6 +21,7 @@ script(src='/js/routes.js')
 script(src='/js/models.js')
 script(src='/js/views.js')
 script
+  document.title = "The Lounge"
   window.router = new Router()
   window.socket = io.connect()
 
