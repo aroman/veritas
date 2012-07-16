@@ -185,7 +185,7 @@
       return fail();
     } else if (__indexOf.call(models.DORMS, dorm) < 0) {
       return fail();
-    } else if (hid.length !== 8 || hid.length !== 9) {
+    } else if (hid.length < 7) {
       return fail();
     } else {
       person = new models.Person();
@@ -385,9 +385,9 @@
   });
 
   app.post("/validate", function(req, res) {
-    var hid, _ref;
+    var hid;
     hid = req.body.hid;
-    if ((_ref = hid.length) === 8 || _ref === 9) {
+    if (hid.length < 7) {
       return res.send("OK");
     } else {
       return res.send("BUT SIRRR");
