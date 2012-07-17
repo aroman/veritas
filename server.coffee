@@ -428,7 +428,6 @@ curses = [
   "nigger",
   "cunt",
   "whore",
-  "ass",
   "dick",
   "penis",
   "vagina",

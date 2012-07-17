@@ -498,7 +498,7 @@
     });
   });
 
-  curses = ["fuck", "shit", "bitch", "douche", "cock", "fag", "faggot", "nigger", "cunt", "whore", "ass", "dick", "penis", "vagina", "pussy", "bastard", "tits", "titty", "titties"];
+  curses = ["fuck", "shit", "bitch", "douche", "cock", "fag", "faggot", "nigger", "cunt", "whore", "dick", "penis", "vagina", "pussy", "bastard", "tits", "titty", "titties"];
 
   cleans = ["squidward", "jigglypuff", "trollface", "cowsaysmoo", "soap", "AGNRY FAIC", "Sarah Palin", "N00t G1ngr1ch", "l.o.l", "$#&!*#$*@&!&$", "pikachu", "creampuffs", "mushrooms", "Kleenex", "POLAR BEARS", "OVER 9000", "supersain", "deep", "BUT SIRRR", "DEEEEEEEEEEEEEEP", "GREAT SUCCESS", "chair", "ductape", "agua", "חביטאח", "watermellon", "Wal-Mart", "EXCEELLLENT", "thorax", "timmy", "bob saget"];
 
