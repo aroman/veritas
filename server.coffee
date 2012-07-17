@@ -34,7 +34,6 @@ smtp = mailer.createTransport "SMTP",
     pass: secrets.EMAIL_PASSWORD
 
 io.set 'transports', ["xhr-polling"]
-io.set 'polling duration', 10
 
 sessionStore = new MongoStore
   db: 'keeba'
@@ -380,9 +379,14 @@ app.get "/lounge*", ensureSession, (req, res) ->
       unless person.groups.length > 1 # 1 = dorm
         return res.redirect "/choose"
 
-      online[uid] =
+      # Add this here because if this is a hard connect,
+      # meaning the browser's first session, the online
+      # hash will not include this user. (It otherwise 
+      # happens on the socket.io connection event.)
+      online[uid] = 
         name: "#{person.first} #{person.last}"
         id: uid
+
       res.render "lounge"
         appmode: true
         groups_bootstrap: JSON.stringify _.union(person.groups, global_groups)
@@ -404,7 +408,10 @@ curses = [
   "penis",
   "vagina",
   "pussy",
-  "tits"
+  "bastard",
+  "tits",
+  "titty",
+  "titties"
 ]
 
 cleans = [
@@ -568,6 +575,7 @@ io.sockets.on "connection", (socket) ->
     async.forEach groups, itr, done
 
   socket.on "disconnect", () ->
+    # MELIOR: Is this check needed?
     if _.has online, uid
       delete online[uid]
     socket.broadcast.emit "online", _.values online

@@ -1,7 +1,7 @@
 <h2 style="margin-left: 20px; margin-right:20px" class="centex">{{name}}</h2>
 <br>
 <div id="messages">
-    {{#each messages}}
-      <p><a href="/people/{{person_id}}" style="color:{{color}}"> {{first}}</a>: {{body}}</p>
-    {{/each}}
+  {{#each messages}}
+    {{{render_message this}}}
+  {{/each}}
 </div>

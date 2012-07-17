@@ -1,3 +1,26 @@
+linkify = (text) ->
+  # URLs starting with http://, https://, or ftp://
+  replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim
+  replacedText = text.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>')
+
+  # URLs starting with www. (without // before it, or it'd re-link the ones done above)
+  replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim
+  replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>')
+
+  # Change email addresses to mailto:: links
+  replacePattern3 = /(\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6})/gim
+  replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>')
+
+  return replacedText
+
+Handlebars.registerHelper "render_message", (o) =>
+  window.q = @
+  """
+    <p>
+      <a href="/people/#{o.person_id}" style="color:#{o.color}"> #{o.first}</a>: #{linkify(o.body)}
+    </p>
+  """
+
 window.ChooseView = Backbone.View.extend
   el: "#choose"
   #TODO: Determine whether this is still needed.
@@ -136,9 +159,8 @@ window.GroupView = Backbone.View.extend
     return group
 
   pushMessage: (message) ->
-    str = '<p><a href="/people/'+message.person_id+'"" style="color:'+@getColor(message.person_id)+'">'+message.first+': </a>'+message.body+'</p>'
     @$("#emptybit").hide()
-    @$("#messages").append(str)
+    @$("#messages").append Handlebars.helpers.render_message(message)
     @$("#messages").scrollTop 1234567890
 
   addMessage: (e) ->
@@ -182,6 +204,14 @@ window.AppView = Backbone.View.extend
       else
         group.set unread: group.get('unread') + 1
         @updateGroupList()
+
+    # There is no server-side handler for this.
+    # It just prevents "disconnect" from triggering
+    # on the server.
+    keepalive = () ->
+      socket.emit "!"
+
+    setInterval keepalive, 20000
 
   routeInternal: (e) ->
     target = $(e.target)
