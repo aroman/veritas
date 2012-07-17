@@ -37,8 +37,8 @@ window.ChooseView = Backbone.View.extend
   render: () ->
     @$el.show()
     @$el.html Handlebars.templates.finder(selected: @selected)
-    _.delay () ->
-      @$("#thebox").focus
+    _.delay () =>
+      @$("#thebox").focus()
     , 10
 
   go: (e) ->
@@ -142,8 +142,8 @@ window.GroupView = Backbone.View.extend
       """
     # Scroll to the bottom
     @$("#messages").scrollTop 1234567890
-    _.delay () ->
-      @$("#chat-input").focus
+    _.delay () =>
+      @$("#chat-input").focus()
     , 10
     @model.set unread: 0
     app.updateGroupList()
@@ -164,7 +164,7 @@ window.GroupView = Backbone.View.extend
   pushMessage: (message) ->
     @$("#emptybit").hide()
     @$("#messages").append Handlebars.helpers.render_message(message)
-    @$("#messages").scrollTop 1234567890
+    @$("#messages").scrollTop @$('#messages')[0].scrollHeight
 
   addMessage: (e) ->
     if e.keyCode is 13
@@ -179,7 +179,7 @@ window.GroupView = Backbone.View.extend
           else
             alert "Message failed for an unknown reason. Yell at Avi."
         else
-          _.delay () ->
+          _.delay () =>
             @$("#chat-input").focus()
           , 10
           @$(e.target).val('')

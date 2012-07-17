@@ -32,12 +32,13 @@
       return this.render();
     },
     render: function() {
+      var _this = this;
       this.$el.show();
       this.$el.html(Handlebars.templates.finder({
         selected: this.selected
       }));
       return _.delay(function() {
-        return this.$("#thebox").focus;
+        return _this.$("#thebox").focus();
       }, 10);
     },
     go: function(e) {
@@ -131,6 +132,7 @@
       return this.render();
     },
     render: function() {
+      var _this = this;
       this.$el.show();
       this.$('.inner').html(Handlebars.templates.group(this.colorize(this.model.toJSON())));
       if (this.model.get('messages').length === 0) {
@@ -138,7 +140,7 @@
       }
       this.$("#messages").scrollTop(1234567890);
       _.delay(function() {
-        return this.$("#chat-input").focus;
+        return _this.$("#chat-input").focus();
       }, 10);
       this.model.set({
         unread: 0
@@ -165,7 +167,7 @@
     pushMessage: function(message) {
       this.$("#emptybit").hide();
       this.$("#messages").append(Handlebars.helpers.render_message(message));
-      return this.$("#messages").scrollTop(1234567890);
+      return this.$("#messages").scrollTop(this.$('#messages')[0].scrollHeight);
     },
     addMessage: function(e) {
       var body,
@@ -186,7 +188,7 @@
             }
           } else {
             _.delay(function() {
-              return this.$("#chat-input").focus();
+              return _this.$("#chat-input").focus();
             }, 10);
             return _this.$(e.target).val('');
           }
