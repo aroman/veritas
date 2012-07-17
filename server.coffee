@@ -532,7 +532,6 @@ io.sockets.on "connection", (socket) ->
         unless err
           io.sockets.emit "message", message: message, group: group_id
 
-
   socket.on "join groups", (groups, cb) ->
     done = (err) ->
       cb err

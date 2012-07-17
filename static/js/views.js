@@ -226,7 +226,7 @@
       socket.on("online", function(people) {
         return _this.updatePersonList(people);
       });
-      return socket.on("message", function(data) {
+      socket.on("message", function(data) {
         var group;
         group = groups.get(data.group);
         group.get('messages').push(data.message);
@@ -239,6 +239,11 @@
           return _this.updateGroupList();
         }
       });
+      return $(window).resize(_.throttle(function() {
+        if (router.current_view) {
+          return router.current_view.scrollBottom();
+        }
+      }, 100));
     },
     routeInternal: function(e) {
       var href, protocol, target;

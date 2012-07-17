@@ -219,6 +219,10 @@ window.AppView = Backbone.View.extend
       else
         group.set unread: group.get('unread') + 1
         @updateGroupList()
+    $(window).resize(_.throttle () ->
+      if router.current_view
+        router.current_view.scrollBottom()
+    , 100)
 
   routeInternal: (e) ->
     target = $(e.target)
