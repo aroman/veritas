@@ -138,14 +138,19 @@
       if (this.model.get('messages').length === 0) {
         this.$("#messages").html("<div id=\"emptybit\" class=\"centex\">\n  <i>No messages yet :'(\n</div>");
       }
-      this.$("#messages").scrollTop(1234567890);
       _.delay(function() {
         return _this.$("#chat-input").focus();
       }, 10);
+      this.scrollBottom();
       this.model.set({
         unread: 0
       });
       return app.updateGroupList();
+    },
+    scrollBottom: function() {
+      var cache;
+      cache = this.$("#messages");
+      return cache.scrollTop(cache[0].scrollHeight);
     },
     getColor: function(person_id) {
       if (!_.has(this.colors, person_id)) {
@@ -166,8 +171,9 @@
     },
     pushMessage: function(message) {
       this.$("#emptybit").hide();
+      message.color = this.getColor(message.person_id);
       this.$("#messages").append(Handlebars.helpers.render_message(message));
-      return this.$("#messages").scrollTop(this.$('#messages')[0].scrollHeight);
+      return this.scrollBottom();
     },
     addMessage: function(e) {
       var body,

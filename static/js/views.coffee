@@ -140,13 +140,16 @@ window.GroupView = Backbone.View.extend
           <i>No messages yet :'(
         </div>
       """
-    # Scroll to the bottom
-    @$("#messages").scrollTop 1234567890
     _.delay () =>
       @$("#chat-input").focus()
     , 10
+    @scrollBottom()
     @model.set unread: 0
     app.updateGroupList()
+
+  scrollBottom: () ->
+    cache = @$("#messages")
+    cache.scrollTop cache[0].scrollHeight
 
   getColor: (person_id) ->
     unless _.has @colors, person_id
@@ -163,8 +166,9 @@ window.GroupView = Backbone.View.extend
 
   pushMessage: (message) ->
     @$("#emptybit").hide()
+    message.color = @getColor message.person_id
     @$("#messages").append Handlebars.helpers.render_message(message)
-    @$("#messages").scrollTop @$('#messages')[0].scrollHeight
+    @scrollBottom()
 
   addMessage: (e) ->
     if e.keyCode is 13
