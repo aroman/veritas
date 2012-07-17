@@ -71,6 +71,12 @@ app.dynamicHelpers
   version: (req, res) ->
     return package_info.version
 
+validateHID = (hid) ->
+  if hid[1..2] is "08"
+    return true
+  else
+    return false
+
 ensureSession = (req, res, next) ->
   if not req.session.person
     res.redirect "/in?whence=#{req.url}"
@@ -163,7 +169,7 @@ app.post "/up", (req, res) ->
   else if dorm not in models.DORMS
     fail()
   # else if hid[1..2] isnt "08" or hid.length isnt 8
-  else if hid.length < 7
+  else if !validateHID(hid)
     fail()
   else
     person = new models.Person()
@@ -339,11 +345,10 @@ app.post "/forgot/:token", (req, res) ->
           res.redirect "/forgot/complete"
 
 app.post "/validate", (req, res) ->
-  hid = req.body.hid
-  if hid.length < 7
-    res.send "BUT SIRRR"
-  else
+  if validateHID(req.body.hid)
     res.send "OK"
+  else
+    res.send "BUTT SIRRR"
 
 app.get "/people/:id", ensureSession, (req, res) ->
   if req.params.id is "me"
