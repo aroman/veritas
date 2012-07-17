@@ -36,7 +36,9 @@
       this.$el.html(Handlebars.templates.finder({
         selected: this.selected
       }));
-      return this.$("#thebox").focus();
+      return _.delay(function() {
+        return this.$("#thebox").focus;
+      }, 10);
     },
     go: function(e) {
       var ack,
@@ -135,7 +137,9 @@
         this.$("#messages").html("<div id=\"emptybit\" class=\"centex\">\n  <i>No messages yet :'(\n</div>");
       }
       this.$("#messages").scrollTop(1234567890);
-      this.$("#chat-input").focus();
+      _.delay(function() {
+        return this.$("#chat-input").focus;
+      }, 10);
       this.model.set({
         unread: 0
       });
@@ -181,6 +185,9 @@
               return alert("Message failed for an unknown reason. Yell at Avi.");
             }
           } else {
+            _.delay(function() {
+              return this.$("#chat-input").focus();
+            }, 10);
             return _this.$(e.target).val('');
           }
         });
