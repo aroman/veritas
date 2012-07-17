@@ -5,7 +5,7 @@
   "main": "server.js",
   "version": "0.1.2",
   "engines": {
-    "node": "0.8.x"
+    "node": "0.8.0"
   },
   "subdomain": "veritas",
   "dependencies": {
