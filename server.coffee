@@ -77,7 +77,19 @@ ensureSession = (req, res, next) ->
   else
     next()
 
-app.get "/", (req, res) ->
+# Redirect requests coming from
+# unsupported browsers to landing
+# page for old browsers.
+browserCheck = (req, res, next) ->
+  ua = req.headers['user-agent']
+  if ua.indexOf("MSIE") isnt -1
+    regex = /MSIE\s(\d{1,2}\.\d)/.exec(ua)
+    version = Number(regex[1])
+    if version < 8
+      return res.redirect "/unsupported"
+  next()
+
+app.get "/", browserCheck, (req, res) ->
   if req.session.person
     res.redirect "/lounge"
   else
@@ -86,15 +98,19 @@ app.get "/", (req, res) ->
       email: ''
       appmode: false
  
-app.get "/what", (req, res) ->
+app.get "/unsupported", (req, res) ->
+  res.render "unsupported"
+    appmode: false
+
+app.get "/what", browserCheck, (req, res) ->
   res.render "what"
     appmode: req.session.person
 
-app.get "/who", (req, res) ->
+app.get "/who", browserCheck, (req, res) ->
   res.render "who"
     appmode: req.session.person
 
-app.get "/up", (req, res) ->
+app.get "/up", browserCheck, (req, res) ->
   if req.session.person
     res.redirect "/lounge"
   else
@@ -194,7 +210,7 @@ app.post "/up", (req, res) ->
               last: person.last
             res.redirect "/lounge"
 
-app.get "/in", (req, res) ->
+app.get "/in", browserCheck, (req, res) ->
   res.render "in"
       appmode: false
       failed: false

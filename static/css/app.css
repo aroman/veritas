@@ -193,7 +193,7 @@ h3 small {
   /*width: 58.446809% !important;*/
 }
 
-.groups-span, .people-span {
+.groups-span, .people-span, .bg-unit {
   background-color: #45515F;
   border-radius: 6px;
   padding-top: 10px;
@@ -201,19 +201,41 @@ h3 small {
   margin-bottom: 25px;
   word-wrap: break-word;
 }
-/*
-.groups-span {
-  width: 16.89361702% !important;
-}
 
-.people-span {
-  width: 20.404255% !important;
-}
-*/
 textarea:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="datetime"]:focus, input[type="datetime-local"]:focus, input[type="date"]:focus, input[type="month"]:focus, input[type="time"]:focus, input[type="week"]:focus, input[type="number"]:focus, input[type="email"]:focus, input[type="url"]:focus, input[type="search"]:focus, input[type="tel"]:focus, input[type="color"]:focus, .uneditable-input:focus {
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 35px rgba(82, 168, 236, .6);
 }
 
 .control-group.error .checkbox:focus, .control-group.error .radio:focus, .control-group.error input:focus, .control-group.error select:focus, .control-group.error textarea:focus {
   box-shadow: 0 0 25px #EE7979;
+}
+
+/* From Keeba */
+
+i.icon-browser {
+  background-image: url(/img/browsers.png);
+  display: inline-block;
+  width: 141px;
+  height: 132px;
+  background-repeat: no-repeat;
+}
+
+i.browser-chrome {
+  background-position: 0px 0px;
+}
+
+i.browser-firefox {
+  background-position: -141px 0px;
+}
+
+i.browser-opera {
+  background-position: -282px 0px;
+}
+
+i.browser-safari {
+  background-position: -423px 0px;
+}
+
+i.browser-ie {
+  background-position: -564px 0px;
 }
