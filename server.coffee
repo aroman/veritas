@@ -34,6 +34,8 @@ smtp = mailer.createTransport "SMTP",
     pass: secrets.EMAIL_PASSWORD
 
 io.set 'transports', ["xhr-polling"]
+io.set 'polling duration', 10
+io.set 'close timeout', 15
 
 sessionStore = new MongoStore
   db: 'keeba'
@@ -384,14 +386,6 @@ app.get "/lounge*", ensureSession, (req, res) ->
       unless person.groups.length > 1 # 1 = dorm
         return res.redirect "/choose"
 
-      # Add this here because if this is a hard connect,
-      # meaning the browser's first session, the online
-      # hash will not include this user. (It otherwise 
-      # happens on the socket.io connection event.)
-      online[person._id] = 
-        name: "#{person.first} #{person.last}"
-        id: person._id
-
       # XXX: Don't do this hardcode patch crap.
       # Actually specify in the query.
       groups = _.union(person.groups, global_groups)
@@ -401,7 +395,6 @@ app.get "/lounge*", ensureSession, (req, res) ->
       res.render "lounge"
         appmode: true
         groups_bootstrap: JSON.stringify groups
-        online: JSON.stringify _.values(online)
 
 curses = [
   "fuck",
@@ -483,14 +476,21 @@ io.sockets.on "connection", (socket) ->
   person = socket.handshake.session.person
   socket.join person._id
 
-  online[person._id] = 
-    name: "#{person.first} #{person.last}"
-    id: person._id
-  socket.broadcast.emit "online", _.values online
+  if _.has online, person._id
+    online[person._id].count += 1
+  else
+    online[person._id] =
+      name: "#{person.first} #{person.last}"
+      id: person._id
+      count: 1
+    socket.broadcast.emit "online", _.values online
 
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
     io.sockets.emit event_name, data
+
+  socket.on "get online", (cb) ->
+    cb _.values(online)
 
   socket.on "group:message", (group_id, body, cb) ->
     if body.length > 1000
@@ -541,11 +541,10 @@ io.sockets.on "connection", (socket) ->
 
     async.forEach groups, itr, done
 
-  socket.on "!", (cb) ->
-    cb()
-
   socket.on "disconnect", () ->
-    # MELIOR: Is this check needed?
-    if _.has online, person._id
+    # Decrement count
+    online[person._id].count -= 1
+    # Remove user if there's no more ghosts
+    if online[person._id].count is 0
       delete online[person._id]
-    socket.broadcast.emit "online", _.values online
+      socket.broadcast.emit "online", _.values online

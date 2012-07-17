@@ -194,6 +194,10 @@ window.AppView = Backbone.View.extend
     @updateGroupList()
     router.on 'highlight', this.highlightSidebar, this
     groups.on "add remove", @updateGroupList, this
+    # Fetch from server
+    socket.emit "get online", (people) =>
+      @updatePersonList people
+    # Subscribe to future updates
     socket.on "online", (people) =>
       @updatePersonList people
     socket.on "message", (data) =>
@@ -204,15 +208,6 @@ window.AppView = Backbone.View.extend
       else
         group.set unread: group.get('unread') + 1
         @updateGroupList()
-
-    # There is no server-side handler for this.
-    # It just prevents "disconnect" from triggering
-    # on the server.
-    keepalive = () ->
-      socket.emit "!", () ->
-        # no-op
-
-    setInterval keepalive, 13000
 
   routeInternal: (e) ->
     target = $(e.target)
@@ -236,6 +231,7 @@ window.AppView = Backbone.View.extend
     @highlightSidebar()
 
   updatePersonList: (people) ->
+    console.log people
     @$("#people").html Handlebars.templates.sidebar_people(people: people)
 
   highlightSidebar: () ->
