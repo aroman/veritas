@@ -468,7 +468,10 @@ io.set "authorization", (data, accept) ->
         accept err.message.toString(), false
       else
         data.session = new connect.middleware.session.Session data, session
-        accept null, true
+        if not data.session.person
+          accept "No session person", false
+        else
+          accept null, true
   else
     accept "No cookie transmitted.", false
 

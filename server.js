@@ -497,7 +497,11 @@
           return accept(err.message.toString(), false);
         } else {
           data.session = new connect.middleware.session.Session(data, session);
-          return accept(null, true);
+          if (!data.session.person) {
+            return accept("No session person", false);
+          } else {
+            return accept(null, true);
+          }
         }
       });
     } else {
