@@ -70,13 +70,13 @@ app.dynamicHelpers
     return package_info.version
 
 ensureSession = (req, res, next) ->
-  if not req.session.uid
+  if not req.session.person
     res.redirect "/in?whence=#{req.url}"
   else
     next()
 
 app.get "/", (req, res) ->
-  if req.session.uid
+  if req.session.person
     res.redirect "/lounge"
   else
     res.render "index"
@@ -86,14 +86,14 @@ app.get "/", (req, res) ->
  
 app.get "/what", (req, res) ->
   res.render "what"
-    appmode: req.session.uid
+    appmode: req.session.person
 
 app.get "/who", (req, res) ->
   res.render "who"
-    appmode: req.session.uid
+    appmode: req.session.person
 
 app.get "/up", (req, res) ->
-  if req.session.uid
+  if req.session.person
     res.redirect "/lounge"
   else
     res.render "up"
@@ -186,7 +186,10 @@ app.post "/up", (req, res) ->
             fail()
           else
             # Log them in.
-            req.session.uid = person._id
+            req.session.person =
+              _id: String(person._id)
+              first: person.first
+              last: person.last
             res.redirect "/lounge"
 
 app.get "/in", (req, res) ->
@@ -213,7 +216,10 @@ app.post "/in", (req, res) ->
         fail()
       else
         if pwh.verify(password, person.password)
-          req.session.uid = person._id
+          req.session.person =
+            _id: String(person._id)
+            first: person.first
+            last: person.last
           res.redirect "/lounge"
         else
           fail()
@@ -323,7 +329,7 @@ app.post "/validate", (req, res) ->
 
 app.get "/people/:id", ensureSession, (req, res) ->
   if req.params.id is "me"
-    return res.redirect "/people/#{req.session.uid}"
+    return res.redirect "/people/#{req.session.person._id}"
 
   id = req.params.id
   models.Person
@@ -350,14 +356,13 @@ app.get "/choose", ensureSession, (req, res) ->
         courses: JSON.stringify courses
 
 app.get "/lounge*", ensureSession, (req, res) ->
-  #FIXME: magic
-  uid = req.session.uid
+  person = req.session.person
 
   async.parallel [
     (cb) ->
       models.Person
         .findOne()
-        .where("_id", uid)
+        .where("_id", person._id)
         .select("first", "last", "groups")
         .populate("groups")
         .run cb
@@ -383,16 +388,15 @@ app.get "/lounge*", ensureSession, (req, res) ->
       # meaning the browser's first session, the online
       # hash will not include this user. (It otherwise 
       # happens on the socket.io connection event.)
-      online[uid] = 
+      online[person._id] = 
         name: "#{person.first} #{person.last}"
-        id: uid
+        id: person._id
 
       # XXX: Don't do this hardcode patch crap.
       # Actually specify in the query.
       groups = _.union(person.groups, global_groups)
       for group in groups
         group.messages = group.messages[-200..]
-        console.log group.messages.length
 
       res.render "lounge"
         appmode: true
@@ -476,79 +480,35 @@ io.set "authorization", (data, accept) ->
     accept "No cookie transmitted.", false
 
 io.sockets.on "connection", (socket) ->
-  uid = socket.handshake.session.uid
-  socket.join uid
+  person = socket.handshake.session.person
+  socket.join person._id
 
-  models.Person
-    .findOne()
-    .where("_id", uid)
-    .select("first", "last")
-    .run (err, person) ->
-      online[uid] = 
-        name: "#{person.first} #{person.last}"
-        id: uid
-      socket.broadcast.emit "online", _.values online
+  online[person._id] = 
+    name: "#{person.first} #{person.last}"
+    id: person._id
+  socket.broadcast.emit "online", _.values online
 
   sync = (model, method, data) ->
     event_name = "#{model}/#{data._id}:#{method}"
     io.sockets.emit event_name, data
 
-  # Broadcasts a message to all connected sessions,
-  # INCLUDING the one that initiated the message.
-  # broadcast = (message, data) ->
-  #   io.sockets.in(token.username).emit(message, data)
-
-  # socket.on "group:create", (data, cb) ->
-  #   async.waterfall [
-  #     (wf_callback) ->
-  #       models.Person
-  #         .findOne()
-  #         .where("uid", uid)
-  #         .run wf_callback
-  #     (account, wf_callback) ->
-  #       group = new models.Group()
-  #       group.name = data.name
-  #       group.members.push account
-  #       group.save (err, group) ->
-  #         wf_callback err, account, group
-  #     (account, group, wf_callback) ->
-  #       account.groups.push group
-  #       account.save (err, account) ->
-  #         wf_callback err, group
-  #   ],
-  #   (err, group) ->
-  #     socket.broadcast.emit "groups:add", group
-  #     cb err, group
-
   socket.on "group:message", (group_id, body, cb) ->
     if body.length > 1000
-      return cb true, "length"
-    # MELIOR: Use one idempotent operation.
-    async.waterfall [
-      (wf_callback) ->
-        models.Person
-          .findOne()
-          .where("_id", uid)
-          .run (err, account) ->
-            wf_callback err, account
-      (account, wf_callback) ->
-        models.Group
-          .findOne()
-          .where("_id", group_id)
-          .run (err, group) ->
-            wf_callback err, account, group
-      (account, group, wf_callback) ->
-        message =
-          first: account.first
-          person_id: account._id
-          body: cussFilter body
-        group.messages.push message
-        group.save (err) ->
-          wf_callback err, group, message
-    ],
-    (err, group, message) ->
-      io.sockets.emit "message", message: message, group: group._id
-      cb err
+      return cb "length"
+
+    message =
+      first: person.first
+      last: person.last
+      person_id: person._id
+      body: cussFilter body
+
+    models.Group.update {_id: group_id},
+      {$push: {messages: message}},
+      (err) ->
+        cb err
+        unless err
+          io.sockets.emit "message", message: message, group: group_id
+
 
   socket.on "join groups", (groups, cb) ->
     done = (err) ->
@@ -559,7 +519,7 @@ io.sockets.on "connection", (socket) ->
         (wf_callback) ->
           models.Person
             .findOne()
-            .where("_id", uid)
+            .where("_id", person._id)
             .run wf_callback
 
         (account, wf_callback) ->
@@ -581,8 +541,11 @@ io.sockets.on "connection", (socket) ->
 
     async.forEach groups, itr, done
 
+  socket.on "!", (cb) ->
+    cb()
+
   socket.on "disconnect", () ->
     # MELIOR: Is this check needed?
-    if _.has online, uid
-      delete online[uid]
+    if _.has online, person._id
+      delete online[person._id]
     socket.broadcast.emit "online", _.values online

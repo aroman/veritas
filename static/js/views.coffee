@@ -14,7 +14,6 @@ linkify = (text) ->
   return replacedText
 
 Handlebars.registerHelper "render_message", (o) =>
-  window.q = @
   """
     <p>
       <a href="/people/#{o.person_id}" style="color:#{o.color}"> #{o.first}</a>: #{linkify(o.body)}
@@ -165,17 +164,18 @@ window.GroupView = Backbone.View.extend
 
   addMessage: (e) ->
     if e.keyCode is 13
-      message = @$(e.target).val()
-      if message
-        socket.emit "group:message", @model.id, message, (err, reason) =>
-          if err
-            if reason is "length"
-              alert "Message too large (> 1000 characters) to post."
-            else
-              alert "Message failed for an unknown reason. Yell at Avi."
+      body = @$(e.target).val()
+      return unless body
+      @$(e.target).prop "disabled", true
+      socket.emit "group:message", @model.id, body, (err) =>
+        @$(e.target).prop "disabled", false
+        if err
+          if err is "length"
+            alert "Message too large (> 1000 characters) to post."
           else
-            @$(e.target).val('')
-            @render
+            alert "Message failed for an unknown reason. Yell at Avi."
+        else
+          @$(e.target).val('')
 
   remove: () ->
     @$el.hide()
@@ -209,9 +209,10 @@ window.AppView = Backbone.View.extend
     # It just prevents "disconnect" from triggering
     # on the server.
     keepalive = () ->
-      socket.emit "!"
+      socket.emit "!", () ->
+        # no-op
 
-    setInterval keepalive, 20000
+    setInterval keepalive, 13000
 
   routeInternal: (e) ->
     target = $(e.target)
@@ -235,7 +236,6 @@ window.AppView = Backbone.View.extend
     @highlightSidebar()
 
   updatePersonList: (people) ->
-    console.log people
     @$("#people").html Handlebars.templates.sidebar_people(people: people)
 
   highlightSidebar: () ->
