@@ -95,7 +95,7 @@
       var fragment, matches;
       fragment = this.$("#thebox").val();
       if (fragment.length) {
-        matches = harvard_courses.filter(function(course) {
+        matches = _.filter(harvard_courses, function(course) {
           return course.name.toLowerCase().indexOf(fragment.toLowerCase()) !== -1;
         });
         if (matches.length > 0) {

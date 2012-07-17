@@ -81,7 +81,7 @@ window.ChooseView = Backbone.View.extend
   search: (e) ->
     fragment = @$("#thebox").val()
     if fragment.length
-      matches = harvard_courses.filter (course) ->
+      matches = _.filter harvard_courses, (course) ->
         course.name.toLowerCase().indexOf(fragment.toLowerCase()) isnt -1
       if matches.length > 0
         @showGroups matches
