@@ -3,3 +3,6 @@ Thumbs.db
 node_modules/
 /*.js
 /static/js/*.js
+static/js/views.js
+
+server.js
