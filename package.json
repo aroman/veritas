@@ -1,11 +1,11 @@
 {
   "name": "veritas",
-  "description": "The Social Network for SSP.",
+  "description": "The \"SSocial\" Network.",
   "author": "Avi Romanoff <aviromanoff@gmail.com>",
   "main": "server.js",
-  "version": "0.1.0-10",
+  "version": "0.1.2",
   "engines": {
-    "node": "0.6.x"
+    "node": "0.8.2"
   },
   "subdomain": "veritas",
   "dependencies": {
