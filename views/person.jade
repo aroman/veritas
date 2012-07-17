@@ -1,6 +1,6 @@
 .container
   .hero-unit
-    h1 Meet #{person.first}.
+    h1 Meet #{person.first} #{person.last}.
     if person.ovaries
       h2 She calls #{person.dorm} her #{person.ovaries.pron} home.
     else 
@@ -14,7 +14,7 @@
       ul
         each group in person.groups
           li
-            a.find-link(style="color:white;font-size:17px", href="/lounge/groups/#{group.id}", data-route) #{group.name}
+            span #{group.name}
     else
       h3 He hasn't listed any groups!
 
