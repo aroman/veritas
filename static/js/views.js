@@ -196,10 +196,8 @@
         group = groups.get(data.group);
         group.get('messages').push(data.message);
         if (router.current_view && router.current_view.model.id === group.id) {
-          console.log("We're currently viewing this group");
           return router.current_view.pushMessage(data.message);
         } else {
-          console.log("Not currently viewing");
           group.set({
             unread: group.get('unread') + 1
           });

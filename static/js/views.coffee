@@ -178,10 +178,8 @@ window.AppView = Backbone.View.extend
       group = groups.get data.group
       group.get('messages').push data.message
       if router.current_view and router.current_view.model.id is group.id
-        console.log "We're currently viewing this group"
         router.current_view.pushMessage data.message
       else
-        console.log "Not currently viewing"
         group.set unread: group.get('unread') + 1
         @updateGroupList()
 
