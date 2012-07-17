@@ -387,9 +387,16 @@ app.get "/lounge*", ensureSession, (req, res) ->
         name: "#{person.first} #{person.last}"
         id: uid
 
+      # XXX: Don't do this hardcode patch crap.
+      # Actually specify in the query.
+      groups = _.union(person.groups, global_groups)
+      for group in groups
+        group.messages = group.messages[-200..]
+        console.log group.messages.length
+
       res.render "lounge"
         appmode: true
-        groups_bootstrap: JSON.stringify _.union(person.groups, global_groups)
+        groups_bootstrap: JSON.stringify groups
         online: JSON.stringify _.values(online)
 
 curses = [
