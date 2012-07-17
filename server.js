@@ -53,7 +53,9 @@
     }
   });
 
-  io.set('transports', ['xhr-polling', 'jsonp-polling']);
+  io.set('transports', ["xhr-polling"]);
+
+  io.set('polling duration', 10);
 
   sessionStore = new MongoStore({
     db: 'keeba',
@@ -463,7 +465,7 @@
 
   curses = ["fuck", "shit", "bitch", "douche", "cock", "fag", "faggot", "nigger", "cunt", "whore", "ass", "dick", "penis", "vagina", "pussy", "tits"];
 
-  cleans = ["squidward", "jigglypuff", "trollface", "cowsaysmoo", "soap", "AGNRY FAIC", "Sarah Palin", "N00t G1ngr1ch", "l.o.l", "$#&!*#$*@&!&$", "pikachu", "creampuffs", "mushrooms", "Kleenex", "POLAR BEARS", "OVER 9000", "supersain", "deep", "BUT SIRRR", "DEEEEEEEEEEEEEEP", "GREAT SUCCESS", "chair", "ductape", "agua", "חביטאח", "watermellon", "Wal-Mart", "EXCEELLLENT", "thorax", "timmy", "James", "bob saget"];
+  cleans = ["squidward", "jigglypuff", "trollface", "cowsaysmoo", "soap", "AGNRY FAIC", "Sarah Palin", "N00t G1ngr1ch", "l.o.l", "$#&!*#$*@&!&$", "pikachu", "creampuffs", "mushrooms", "Kleenex", "POLAR BEARS", "OVER 9000", "supersain", "deep", "BUT SIRRR", "DEEEEEEEEEEEEEEP", "GREAT SUCCESS", "chair", "ductape", "agua", "חביטאח", "watermellon", "Wal-Mart", "EXCEELLLENT", "thorax", "timmy", "bob saget"];
 
   cussFilter = function(text) {
     var curse, pattern, _i, _len;

@@ -33,10 +33,8 @@ smtp = mailer.createTransport "SMTP",
     user: secrets.EMAIL_ADDRESS
     pass: secrets.EMAIL_PASSWORD
 
-io.set 'transports', [
-  'xhr-polling',
-  'jsonp-polling'
-]
+io.set 'transports', ["xhr-polling"]
+io.set 'polling duration', 10
 
 sessionStore = new MongoStore
   db: 'keeba'
@@ -440,7 +438,6 @@ cleans = [
   "EXCEELLLENT",
   "thorax",
   "timmy",
-  "James",
   "bob saget"
 ]
 
