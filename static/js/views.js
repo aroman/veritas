@@ -211,7 +211,9 @@
 
   window.AppView = Backbone.View.extend({
     el: "body",
-    username: null,
+    base_title: "The Lounge",
+    count: 0,
+    focus: true,
     events: {
       "click a[data-route]": "routeInternal"
     },
@@ -236,14 +238,28 @@
           group.set({
             unread: group.get('unread') + 1
           });
-          return _this.updateGroupList();
+          _this.count += 1;
+          _this.updateGroupList();
+          return _this.flashTitle();
         }
       });
-      return $(window).resize(_.throttle(function() {
+      $(window).resize(_.throttle(function() {
         if (router.current_view) {
           return router.current_view.scrollBottom();
         }
       }, 100));
+      $(window).focus(function() {
+        _this.focus = true;
+        return _this.count = 0;
+      });
+      return $(window).focusout(function() {
+        return _this.focus = false;
+      });
+    },
+    flashTitle: function() {
+      if (!this.focus) {
+        return document.title = "(" + this.count + ") " + this.base_title;
+      }
     },
     routeInternal: function(e) {
       var href, protocol, target;
@@ -264,7 +280,6 @@
       return this.highlightSidebar();
     },
     updatePersonList: function(people) {
-      console.log(people);
       return this.$("#people").html(Handlebars.templates.sidebar_people({
         people: people
       }));

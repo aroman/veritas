@@ -165,7 +165,7 @@ window.GroupView = Backbone.View.extend
     return group
 
   pushMessage: (message) ->
-    @$("#emptybit").hide()
+    @$("#emptybit").hide() # No messages div
     message.color = @getColor message.person_id
     @$("#messages").append Handlebars.helpers.render_message(message)
     @scrollBottom()
@@ -196,7 +196,9 @@ window.GroupView = Backbone.View.extend
 
 window.AppView = Backbone.View.extend
   el: "body"
-  username: null
+  base_title: "The Lounge"
+  count: 0
+  focus: true
 
   events:
     "click a[data-route]": "routeInternal"
@@ -205,12 +207,15 @@ window.AppView = Backbone.View.extend
     @updateGroupList()
     router.on 'highlight', this.highlightSidebar, this
     groups.on "add remove", @updateGroupList, this
+
     # Fetch from server
     socket.emit "get online", (people) =>
       @updatePersonList people
+
     # Subscribe to future updates
     socket.on "online", (people) =>
       @updatePersonList people
+
     socket.on "message", (data) =>
       group = groups.get data.group
       group.get('messages').push data.message
@@ -218,11 +223,25 @@ window.AppView = Backbone.View.extend
         router.current_view.pushMessage data.message
       else
         group.set unread: group.get('unread') + 1
+        @count += 1
         @updateGroupList()
+        @flashTitle()
+
     $(window).resize(_.throttle () ->
       if router.current_view
         router.current_view.scrollBottom()
     , 100)
+
+    $(window).focus () =>
+      @focus = true
+      @count = 0
+
+    $(window).focusout () =>
+      @focus = false
+
+  flashTitle: () ->
+    unless @focus
+      document.title = "(#{@count}) #{@base_title}"
 
   routeInternal: (e) ->
     target = $(e.target)
@@ -246,7 +265,6 @@ window.AppView = Backbone.View.extend
     @highlightSidebar()
 
   updatePersonList: (people) ->
-    console.log people
     @$("#people").html Handlebars.templates.sidebar_people(people: people)
 
   highlightSidebar: () ->
